@@ -1,14 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { responsiveFontSize, scale } from '../../constants/Responsive';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SPORTS = [
   { key: 'Padel', icon: 'tennisball', desc: 'Brza, zabavna igra' },
   { key: 'Fudbal', icon: 'football', desc: 'Tim, energija, golovi' },
-  { key: 'Košarka', icon: 'basketball', desc: 'Skokovi, šutevi, tim' },
+  { key: 'Kosarka', icon: 'basketball', desc: 'Skokovi, sutovi, tim' },
   { key: 'Tenis', icon: 'tennisball-outline', desc: 'Preciznost, brzina, solo' },
 ];
 

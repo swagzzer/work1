@@ -1,10 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { Linking, Modal, Text, TouchableOpacity, View } from 'react-native';
-import { scale, verticalScale } from '../constants/Responsive';
+import { scale } from '../constants/Responsive';
 
-const InviteFriendsPopup = ({ visible, onClose, isDarkMode = true }) => {
-  const inviteMessage = "Pozdrav! Pridruži se meni na Sastav aplikaciji i igraj najbolje mečeve u gradu! 🏆⚽🏀🎾";
+const InviteFriendsPopup = ({ visible, onClose, isDarkMode = true, language = 'serbian', t }) => {
+  const inviteMessage = "Pozdrav! Pridruzi se meni na Sastav aplikaciji i igraj najbolje meceve u gradu! 🏆🔵🏀🎾";
 
   const handleInstagramInvite = () => {
     const instagramUrl = `https://www.instagram.com/`;
@@ -39,7 +39,7 @@ const InviteFriendsPopup = ({ visible, onClose, isDarkMode = true }) => {
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
-      <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' }}>
+      <View style={{ flex: 1, justifyContent: 'flex-end' }}>
         <View style={{ 
           backgroundColor: isDarkMode ? '#2a3441' : '#fff', 
           borderTopLeftRadius: scale(18), 
@@ -50,7 +50,7 @@ const InviteFriendsPopup = ({ visible, onClose, isDarkMode = true }) => {
         }}>
           {/* Header */}
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: scale(12) }}>
-            <Text style={{ color: '#FFFF00', fontWeight: '300', fontSize: 14, letterSpacing: 0.8 }}>Pozovi prijatelje</Text>
+            <Text style={{ color: '#FFFF00', fontWeight: '300', fontSize: 14, letterSpacing: 0.8 }}>{t.inviteFriendsTitle}</Text>
             <TouchableOpacity onPress={onClose}>
               <Ionicons name="close" size={20} color="#FFFF00" />
             </TouchableOpacity>
@@ -58,7 +58,7 @@ const InviteFriendsPopup = ({ visible, onClose, isDarkMode = true }) => {
 
           {/* Description */}
           <Text style={{ color: isDarkMode ? '#fff' : '#000', fontSize: 12, textAlign: 'center', marginBottom: scale(16), lineHeight: 16, fontWeight: '300' }}>
-            Podeli Sastav sa svojim prijateljima!
+            {t.inviteFriendsDescription}
           </Text>
 
           {/* Social Media Options - Side by Side */}
@@ -68,15 +68,15 @@ const InviteFriendsPopup = ({ visible, onClose, isDarkMode = true }) => {
               onPress={handleInstagramInvite}
               style={{
                 flex: 1,
-                backgroundColor: '#FFFF00',
+                backgroundColor: '#E4405F',
                 borderRadius: scale(12),
                 padding: scale(12),
                 alignItems: 'center',
                 marginRight: scale(4)
               }}
             >
-              <Ionicons name="logo-instagram" size={20} color="#000" style={{ marginBottom: scale(4) }} />
-              <Text style={{ color: '#000', fontWeight: '300', fontSize: 10, textAlign: 'center' }}>Instagram</Text>
+              <Ionicons name="logo-instagram" size={20} color="#FFFFFF" style={{ marginBottom: scale(4) }} />
+              <Text style={{ color: '#FFFFFF', fontWeight: '300', fontSize: 10, textAlign: 'center' }}>Instagram</Text>
             </TouchableOpacity>
 
             {/* WhatsApp */}
@@ -84,15 +84,15 @@ const InviteFriendsPopup = ({ visible, onClose, isDarkMode = true }) => {
               onPress={handleWhatsAppInvite}
               style={{
                 flex: 1,
-                backgroundColor: '#FFFF00',
+                backgroundColor: '#25D366',
                 borderRadius: scale(12),
                 padding: scale(12),
                 alignItems: 'center',
                 marginHorizontal: scale(2)
               }}
             >
-              <Ionicons name="logo-whatsapp" size={20} color="#000" style={{ marginBottom: scale(4) }} />
-              <Text style={{ color: '#000', fontWeight: '300', fontSize: 10, textAlign: 'center' }}>WhatsApp</Text>
+              <Ionicons name="logo-whatsapp" size={20} color="#FFFFFF" style={{ marginBottom: scale(4) }} />
+              <Text style={{ color: '#FFFFFF', fontWeight: '300', fontSize: 10, textAlign: 'center' }}>WhatsApp</Text>
             </TouchableOpacity>
 
             {/* Viber */}
@@ -100,15 +100,15 @@ const InviteFriendsPopup = ({ visible, onClose, isDarkMode = true }) => {
               onPress={handleViberInvite}
               style={{
                 flex: 1,
-                backgroundColor: '#FFFF00',
+                backgroundColor: '#7360F2',
                 borderRadius: scale(12),
                 padding: scale(12),
                 alignItems: 'center',
                 marginLeft: scale(4)
               }}
             >
-              <Ionicons name="chatbubble" size={20} color="#000" style={{ marginBottom: scale(4) }} />
-              <Text style={{ color: '#000', fontWeight: '300', fontSize: 10, textAlign: 'center' }}>Viber</Text>
+              <Ionicons name="chatbubble" size={20} color="#FFFFFF" style={{ marginBottom: scale(4) }} />
+              <Text style={{ color: '#FFFFFF', fontWeight: '300', fontSize: 10, textAlign: 'center' }}>Viber</Text>
             </TouchableOpacity>
           </View>
 
@@ -124,7 +124,7 @@ const InviteFriendsPopup = ({ visible, onClose, isDarkMode = true }) => {
             }}
           >
             <Text style={{ color: '#000', fontWeight: '300', fontSize: 12, letterSpacing: 0.5 }}>
-              Zatvori
+              {t.close}
             </Text>
           </TouchableOpacity>
         </View>

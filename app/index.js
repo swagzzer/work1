@@ -1,11 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import React, { useRef, useState, useEffect } from 'react';
-import { ActivityIndicator, Animated, Easing, Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Animated, Easing, Image, Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import AnimatedBackground from '../components/AnimatedBackground';
+import { responsiveFontSize, scale } from '../constants/Responsive';
 import { supabase } from '../services/supabaseClient';
-import { scale, verticalScale, responsiveFontSize } from '../constants/Responsive';
 
 const LandingScreen = () => {
   const [mode, setMode] = useState('sign-in');
@@ -19,7 +19,7 @@ const LandingScreen = () => {
   const [message, setMessage] = useState(null);
   const [messageType, setMessageType] = useState('');
   const [language, setLanguage] = useState('serbian');
-  const [isDarkMode, setIsDarkMode] = useState(true);
+
   const cardAnim = useRef(new Animated.Value(0)).current;
   const emailRef = useRef();
   const fullNameRef = useRef();
@@ -89,10 +89,7 @@ const LandingScreen = () => {
     const loadPreferences = async () => {
       try {
         const savedLanguage = await AsyncStorage.getItem('language');
-        const savedDarkMode = await AsyncStorage.getItem('isDarkMode');
-        
         if (savedLanguage) setLanguage(savedLanguage);
-        if (savedDarkMode !== null) setIsDarkMode(savedDarkMode === 'true');
       } catch (error) {
         console.log('Error loading preferences:', error);
       }
@@ -110,22 +107,9 @@ const LandingScreen = () => {
     }
   };
 
-  const saveDarkMode = async (mode) => {
-    try {
-      await AsyncStorage.setItem('isDarkMode', mode.toString());
-      setIsDarkMode(mode);
-    } catch (error) {
-      console.log('Error saving dark mode:', error);
-    }
-  };
-
   const handleLanguageToggle = () => {
     const newLanguage = language === 'serbian' ? 'english' : 'serbian';
     saveLanguage(newLanguage);
-  };
-
-  const handleDarkModeToggle = () => {
-    saveDarkMode(!isDarkMode);
   };
 
   const animateCard = (up) => {
@@ -155,6 +139,15 @@ const LandingScreen = () => {
           setMessageType('error');
           return;
         }
+        
+        // If email is null, the profile is corrupted
+        if (!data.email) {
+          setLoading(false);
+          setMessage('Profile corrupted: no email associated with username. Please contact support.');
+          setMessageType('error');
+          return;
+        }
+        
         emailToUse = data.email;
       }
       const { error } = await supabase.auth.signInWithPassword({ email: emailToUse, password });
@@ -218,28 +211,18 @@ const LandingScreen = () => {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <AnimatedBackground isDarkMode={isDarkMode}>
+      <AnimatedBackground>
         <View style={styles.bg}>
           {/* Header with toggle buttons */}
           <View style={styles.header}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', width: '100%', paddingHorizontal: scale(16), paddingTop: scale(38) }}>
-              {/* Dark Mode Toggle */}
-              <TouchableOpacity 
-                style={[styles.toggleButton, { backgroundColor: isDarkMode ? '#181818' : '#F5F5F5' }]}
-                onPress={handleDarkModeToggle}
-              >
-                <Ionicons 
-                  name={isDarkMode ? "sunny" : "moon"} 
-                  size={scale(22)} 
-                  color="#FFFF00" 
-                />
-              </TouchableOpacity>
+
               
               {/* Language Toggle */}
-              <TouchableOpacity 
-                style={[styles.toggleButton, { backgroundColor: isDarkMode ? '#181818' : '#F5F5F5' }]}
-                onPress={handleLanguageToggle}
-              >
+                                <TouchableOpacity 
+                    style={[styles.toggleButton, { backgroundColor: '#2a3441' }]}
+                    onPress={handleLanguageToggle}
+                  >
                 <Text style={{ color: '#FFFF00', fontSize: responsiveFontSize(14), fontWeight: '300', letterSpacing: 0.5 }}>
                   {language === 'serbian' ? 'EN' : 'SR'}
                 </Text>
@@ -247,17 +230,25 @@ const LandingScreen = () => {
             </View>
           </View>
           
-          <Animated.View style={[styles.card, { backgroundColor: isDarkMode ? '#181818' : '#F5F5F5', transform: [{ translateY: cardAnim }] }]}>
-            <View style={styles.emojiCircle}><Text style={styles.emoji}>⚽️</Text></View>
+          <Animated.View style={[styles.card, { backgroundColor: '#2a3441', transform: [{ translateY: cardAnim }] }]}>
+            <Image 
+              source={require('../assets/images/logo.png')}
+              style={{
+                width: 80,
+                height: 80,
+                resizeMode: 'contain',
+                marginBottom: 20
+              }}
+            />
             <Text style={[styles.welcome, { fontWeight: '300', fontSize: responsiveFontSize(19), letterSpacing: 0.8 }]}>{t.welcome}</Text>
-            <Text style={[styles.subtitle, { color: isDarkMode ? '#b0b8c1' : '#666' }]}>{mode === 'sign-in' ? t.subtitleSignIn : t.subtitleSignUp}</Text>
+            <Text style={[styles.subtitle, { color: '#b0b8c1' }]}>{mode === 'sign-in' ? t.subtitleSignIn : t.subtitleSignUp}</Text>
             {mode === 'sign-in' ? (
-              <View style={[styles.inputRow, { backgroundColor: isDarkMode ? '#10182a' : '#F0F0F0' }]}>
-                <Ionicons name="person-outline" size={20} color={isDarkMode ? "#b0b8c1" : "#666"} style={styles.inputIcon} />
+              <View style={[styles.inputRow, { backgroundColor: '#10182a' }]}>
+                <Ionicons name="person-outline" size={20} color="#b0b8c1" style={styles.inputIcon} />
                 <TextInput
-                  style={[styles.inputFake, { color: isDarkMode ? '#b0b8c1' : '#000' }]}
+                  style={[styles.inputFake, { color: '#b0b8c1' }]}
                   placeholder={t.emailOrUsername}
-                  placeholderTextColor={isDarkMode ? "#b0b8c1" : "#666"}
+                  placeholderTextColor="#b0b8c1"
                   value={emailOrUsername}
                   onChangeText={setEmailOrUsername}
                   autoCapitalize="none"
@@ -269,13 +260,13 @@ const LandingScreen = () => {
               </View>
             ) : (
               <React.Fragment>
-                <View style={[styles.inputRow, { backgroundColor: isDarkMode ? '#10182a' : '#F0F0F0' }]}>
-                  <Ionicons name="mail-outline" size={20} color={isDarkMode ? "#b0b8c1" : "#666"} style={styles.inputIcon} />
+                <View style={[styles.inputRow, { backgroundColor: '#10182a' }]}>
+                  <Ionicons name="mail-outline" size={20} color="#b0b8c1" style={styles.inputIcon} />
                   <TextInput
                     ref={emailRef}
-                    style={[styles.inputFake, { color: isDarkMode ? '#b0b8c1' : '#000' }]}
+                    style={[styles.inputFake, { color: '#b0b8c1' }]}
                     placeholder={t.email}
-                    placeholderTextColor={isDarkMode ? "#b0b8c1" : "#666"}
+                    placeholderTextColor="#b0b8c1"
                     value={email}
                     onChangeText={setEmail}
                     autoCapitalize="none"
@@ -286,13 +277,13 @@ const LandingScreen = () => {
                     onSubmitEditing={() => fullNameRef.current && fullNameRef.current.focus()}
                   />
                 </View>
-                <View style={[styles.inputRow, { backgroundColor: isDarkMode ? '#10182a' : '#F0F0F0' }]}>
-                  <Ionicons name="person-outline" size={20} color={isDarkMode ? "#b0b8c1" : "#666"} style={styles.inputIcon} />
+                <View style={[styles.inputRow, { backgroundColor: '#10182a' }]}>
+                  <Ionicons name="person-outline" size={20} color="#b0b8c1" style={styles.inputIcon} />
                   <TextInput
                     ref={fullNameRef}
-                    style={[styles.inputFake, { color: isDarkMode ? '#b0b8c1' : '#000' }]}
+                    style={[styles.inputFake, { color: '#b0b8c1' }]}
                     placeholder={t.fullName}
-                    placeholderTextColor={isDarkMode ? "#b0b8c1" : "#666"}
+                    placeholderTextColor="#b0b8c1"
                     value={fullName}
                     onChangeText={setFullName}
                     autoCapitalize="words"
@@ -302,13 +293,13 @@ const LandingScreen = () => {
                     onSubmitEditing={() => usernameRef.current && usernameRef.current.focus()}
                   />
                 </View>
-                <View style={[styles.inputRow, { backgroundColor: isDarkMode ? '#10182a' : '#F0F0F0' }]}>
-                  <Ionicons name="at-outline" size={20} color={isDarkMode ? "#b0b8c1" : "#666"} style={styles.inputIcon} />
+                <View style={[styles.inputRow, { backgroundColor: '#10182a' }]}>
+                  <Ionicons name="at-outline" size={20} color="#b0b8c1" style={styles.inputIcon} />
                   <TextInput
                     ref={usernameRef}
-                    style={[styles.inputFake, { color: isDarkMode ? '#b0b8c1' : '#000' }]}
+                    style={[styles.inputFake, { color: '#b0b8c1' }]}
                     placeholder={t.username}
-                    placeholderTextColor={isDarkMode ? "#b0b8c1" : "#666"}
+                    placeholderTextColor="#b0b8c1"
                     value={username}
                     onChangeText={setUsername}
                     autoCapitalize="none"
@@ -320,13 +311,13 @@ const LandingScreen = () => {
                 </View>
               </React.Fragment>
             )}
-            <View style={[styles.inputRow, { backgroundColor: isDarkMode ? '#10182a' : '#F0F0F0' }]}>
-              <Ionicons name="lock-closed-outline" size={20} color={isDarkMode ? "#b0b8c1" : "#666"} style={styles.inputIcon} />
+            <View style={[styles.inputRow, { backgroundColor: '#10182a' }]}>
+              <Ionicons name="lock-closed-outline" size={20} color="#b0b8c1" style={styles.inputIcon} />
               <TextInput
                 ref={passwordRef}
-                style={[styles.inputFake, { color: isDarkMode ? '#b0b8c1' : '#000' }]}
+                style={[styles.inputFake, { color: '#b0b8c1' }]}
                 placeholder={t.password}
-                placeholderTextColor={isDarkMode ? "#b0b8c1" : "#666"}
+                placeholderTextColor="#b0b8c1"
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
@@ -340,13 +331,13 @@ const LandingScreen = () => {
               />
             </View>
             {mode === 'sign-up' && (
-              <View style={[styles.inputRow, { backgroundColor: isDarkMode ? '#10182a' : '#F0F0F0' }]}>
-                <Ionicons name="lock-closed-outline" size={20} color={isDarkMode ? "#b0b8c1" : "#666"} style={styles.inputIcon} />
+              <View style={[styles.inputRow, { backgroundColor: '#10182a' }]}>
+                <Ionicons name="lock-closed-outline" size={20} color="#b0b8c1" style={styles.inputIcon} />
                 <TextInput
                   ref={confirmRef}
-                  style={[styles.inputFake, { color: isDarkMode ? '#b0b8c1' : '#000' }]}
+                  style={[styles.inputFake, { color: '#b0b8c1' }]}
                   placeholder={t.confirmPassword}
-                  placeholderTextColor={isDarkMode ? "#b0b8c1" : "#666"}
+                  placeholderTextColor="#b0b8c1"
                   value={confirm}
                   onChangeText={setConfirm}
                   secureTextEntry
@@ -371,12 +362,12 @@ const LandingScreen = () => {
               )}
             </TouchableOpacity>
             <View style={styles.dividerRow}>
-              <View style={[styles.divider, { backgroundColor: isDarkMode ? '#232b3b' : '#DDD' }]} />
-              <Text style={[styles.dividerText, { color: isDarkMode ? '#b0b8c1' : '#666' }]}>{t.or}</Text>
-              <View style={[styles.divider, { backgroundColor: isDarkMode ? '#232b3b' : '#DDD' }]} />
+              <View style={[styles.divider, { backgroundColor: '#232b3b' }]} />
+              <Text style={[styles.dividerText, { color: '#b0b8c1' }]}>{t.or}</Text>
+              <View style={[styles.divider, { backgroundColor: '#232b3b' }]} />
             </View>
             <View style={styles.bottomRow}>
-              <Text style={[styles.bottomText, { color: isDarkMode ? '#b0b8c1' : '#666' }]}>{mode === 'sign-in' ? t.noAccount : t.haveAccount}</Text>
+              <Text style={[styles.bottomText, { color: '#b0b8c1' }]}>{mode === 'sign-in' ? t.noAccount : t.haveAccount}</Text>
               <TouchableOpacity onPress={() => { setMode(mode === 'sign-in' ? 'sign-up' : 'sign-in'); setMessage(null); }}>
                 <Text style={styles.signUpLink}>{mode === 'sign-in' ? t.register : t.login}</Text>
               </TouchableOpacity>
@@ -411,7 +402,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   card: {
-    backgroundColor: '#181818',
+    backgroundColor: '#2a3441',
     borderRadius: 18,
     padding: 28,
     alignItems: 'center',

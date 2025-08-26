@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, ScrollView, StyleSheet } from 'react-native';
@@ -14,7 +15,6 @@ import {
     sendFriendRequest,
     supabase
 } from '../../services/supabaseClient';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const UserProfileScreen = () => {
   const { userId } = useLocalSearchParams();
@@ -87,11 +87,37 @@ const UserProfileScreen = () => {
   }, [userId]);
 
   useEffect(() => {
-    if (!userId) return;
+    if (!userId || !currentUserId) return;
     const fetchProfile = async () => {
       setLoading(true);
       const { data: profileData, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
       if (profileData) {
+        // Check if profile is private, user is not the owner, and they are not friends
+        if (profileData.privacy_settings?.profileVisibility === 'private' && 
+            profileData.id !== currentUserId) {
+          
+          // Check if they are friends
+          const { data: friendshipData } = await supabase
+            .from('friends')
+            .select('*')
+            .or(`and(from_user.eq.${currentUserId},to_user.eq.${profileData.id}),and(from_user.eq.${profileData.id},to_user.eq.${currentUserId})`);
+          
+          const areFriends = friendshipData && friendshipData.length > 0;
+          
+          if (!areFriends) {
+            Alert.alert(
+              language === 'english' ? 'Private Profile' : 'Privatan profil',
+              language === 'english' ? 'This profile is private and cannot be accessed.' : 'Ovaj profil je privatan i ne može se pristupiti.',
+              [
+                {
+                  text: language === 'english' ? 'OK' : 'U redu',
+                  onPress: () => router.back()
+                }
+              ]
+            );
+            return;
+          }
+        }
         setProfile(profileData);
       } else {
         console.error('Error fetching profile:', error);
@@ -99,7 +125,7 @@ const UserProfileScreen = () => {
       setLoading(false);
     };
     fetchProfile();
-  }, [userId]);
+  }, [userId, currentUserId]);
 
   // Prefetch all sports data for the viewed user
   useEffect(() => {
@@ -180,7 +206,7 @@ const UserProfileScreen = () => {
     try {
       if (mode === 'delete' || friendStatus === 'friends') {
         Alert.alert("Ukloni prijatelja", "Da li ste sigurni?", [
-          { text: "Otkaži", style: "cancel" },
+          { text: "Otkazi", style: "cancel" },
           { text: "Ukloni", style: "destructive", onPress: async () => {
             await removeFriend(currentUserId, userId);
             setFriendStatus(null);
@@ -201,7 +227,7 @@ const UserProfileScreen = () => {
           .select('*')
           .or(`and(from_user.eq.${userId},to_user.eq.${currentUserId})`);
         if (error || !requests || requests.length === 0) {
-          Alert.alert('Greška', 'Nije pronađen zahtev za prijateljstvo.');
+          Alert.alert('Greška', 'Nije pronadjen zahtev za prijateljstvo.');
           return;
         }
         const requestId = requests[0].id;
@@ -215,7 +241,7 @@ const UserProfileScreen = () => {
         setFriendStatus('request_sent');
       }
     } catch (error) {
-      Alert.alert("Greška", "Došlo je do greške prilikom izvršavanja akcije.");
+      Alert.alert("Greška", "Došlo je do greške prilikom izvrsavanja akcije.");
       console.error("Friend action error:", error);
     }
   };
@@ -235,7 +261,7 @@ const UserProfileScreen = () => {
         window.openChatTab = openTab;
       }, 100);
     } catch (error) {
-      Alert.alert('Greška', 'Ne može se otvoriti chat: ' + error.message);
+      Alert.alert('Greška', 'Ne moze se otvoriti chat: ' + error.message);
     }
   };
 

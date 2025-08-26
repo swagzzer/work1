@@ -20,7 +20,7 @@ const getSportLabel = (sportKey, language) => {
     serbian: {
       padel: 'Padel',
       fudbal: 'Fudbal',
-      kosarka: 'Košarka',
+      kosarka: 'Kosarka',
       tenis: 'Tenis',
     },
     english: {
@@ -131,7 +131,7 @@ export const ProfileDisplay = ({
         }));
         setAllAchievementsData(result);
       } catch (err) {
-        setAchievementsError('Greška pri učitavanju dostignuća.');
+        setAchievementsError('Greška pri ucitavanju dostignuca.');
       } finally {
         setAchievementsLoading(false);
       }
@@ -732,7 +732,7 @@ export const ProfileDisplay = ({
         <View style={[styles.statCard, { backgroundColor: isDarkMode ? '#2a3441' : '#F5F5F5' }]}>
           <MaterialIcons name="calendar-today" size={scale(24)} color={isDarkMode ? '#fff' : '#000'} />
           <Text style={[styles.statValue, { color: isDarkMode ? '#fff' : '#000' }]}>{statsData?.matchesPlayed || 0}</Text>
-          <Text style={[styles.statLabel, { color: isDarkMode ? '#b0bec5' : '#666' }]} numberOfLines={1} ellipsizeMode="tail">{language === 'english' ? 'Played matches' : 'Odigrani mečevi'}</Text>
+          <Text style={[styles.statLabel, { color: isDarkMode ? '#b0bec5' : '#666' }]} numberOfLines={1} ellipsizeMode="tail">{language === 'english' ? 'Played matches' : 'Odigrani mecevi'}</Text>
         </View>
         <View style={[styles.statCard, { backgroundColor: isDarkMode ? '#2a3441' : '#F5F5F5' }]}>
           <MaterialIcons name="star" size={scale(24)} color={isDarkMode ? '#fff' : '#000'} />
@@ -998,7 +998,7 @@ export const ProfileDisplay = ({
               )}
               {previewItem.section === 'username' && (
                 <View style={{ alignItems: 'center', marginBottom: 24 }}>
-                  <Text style={{ color: '#FFD600', fontWeight: '400', fontSize: responsiveFontSize(16), marginBottom: 12, letterSpacing: 0.8 }}>Pregled korisničkog imena</Text>
+                  <Text style={{ color: '#FFD600', fontWeight: '400', fontSize: responsiveFontSize(16), marginBottom: 12, letterSpacing: 0.8 }}>Pregled korisnickog imena</Text>
                   <View style={{ width: 180, height: 40, justifyContent: 'center', alignItems: 'center', backgroundColor: '#2a3441', borderRadius: 8, overflow: 'hidden' }}>
                     <LottieView
                       source={previewItem.animation_url ? { uri: previewItem.animation_url } : ANIMATION_PREVIEWS.username}

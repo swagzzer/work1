@@ -26,18 +26,14 @@ const getTabTitles = (language) => {
 
 const TabsLayout = () => {
   const [unread, setUnread] = React.useState(0);
-  const [isDarkMode, setIsDarkMode] = useState(true);
+
   const [language, setLanguage] = useState('serbian');
 
-  // Load dark mode and language preferences from storage
+  // Load language preferences from storage
   useEffect(() => {
     const loadPreferences = async () => {
       try {
-        const savedMode = await AsyncStorage.getItem('isDarkMode');
         const savedLanguage = await AsyncStorage.getItem('language');
-        if (savedMode !== null) {
-          setIsDarkMode(JSON.parse(savedMode));
-        }
         if (savedLanguage !== null) {
           setLanguage(savedLanguage);
         }
@@ -48,18 +44,11 @@ const TabsLayout = () => {
     loadPreferences();
   }, []);
 
-  // Listen for preference changes with a longer interval
+  // Listen for language preference changes
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
-        const savedMode = await AsyncStorage.getItem('isDarkMode');
         const savedLanguage = await AsyncStorage.getItem('language');
-        if (savedMode !== null) {
-          const newMode = JSON.parse(savedMode);
-          if (newMode !== isDarkMode) {
-            setIsDarkMode(newMode);
-          }
-        }
         if (savedLanguage !== null && savedLanguage !== language) {
           setLanguage(savedLanguage);
         }
@@ -69,16 +58,9 @@ const TabsLayout = () => {
     }, 500); // Check every 500ms for faster response
 
     return () => clearInterval(interval);
-  }, [isDarkMode, language]);
+  }, [language]);
 
-  // Save dark mode preference to storage
-  const saveDarkMode = async (mode) => {
-    try {
-      await AsyncStorage.setItem('isDarkMode', JSON.stringify(mode));
-    } catch (error) {
-      console.log('Error saving dark mode preference:', error);
-    }
-  };
+
 
 
 
@@ -100,18 +82,18 @@ const TabsLayout = () => {
             iconName = focused ? 'person' : 'person-outline';
           }
 
-          return <Ionicons name={iconName} size={size} color={focused ? '#FFFF00' : (isDarkMode ? '#fff' : '#000')} />;
+          return <Ionicons name={iconName} size={size} color={focused ? '#FFFF00' : '#fff'} />;
         },
         headerShown: false,
         tabBarActiveTintColor: '#FFFF00',
-        tabBarInactiveTintColor: isDarkMode ? '#fff' : '#000',
+        tabBarInactiveTintColor: '#fff',
         tabBarLabelStyle: { fontWeight: '300', fontSize: responsiveFontSize(12), letterSpacing: 0.5 },
         tabBarStyle: {
           borderTopWidth: 2,
           borderTopColor: '#FFFF00',
         },
         tabBarBackground: () => (
-          <View style={{ flex: 1, backgroundColor: isDarkMode ? '#2a3441' : '#FFFFFF' }} />
+          <View style={{ flex: 1, backgroundColor: '#2a3441' }} />
         ),
       })}
     >

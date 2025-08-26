@@ -1,8 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useRef, useState } from 'react';
-import { Dimensions, Keyboard, Modal, PanResponder, Animated as RNAnimated, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+import { Dimensions, Image, Keyboard, Modal, PanResponder, Animated as RNAnimated, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import { supabase } from '../services/supabaseClient';
-import AnimatedBackground from './AnimatedBackground';
 
 function DraggableSearchFAB({ setSearchVisible, onUserSelect }) {
   const [searchInput, setSearchInput] = useState('');
@@ -80,7 +79,7 @@ function DraggableSearchFAB({ setSearchVisible, onUserSelect }) {
     (async () => {
       const { data: userData } = await supabase.auth.getUser();
       setCurrentUserId(userData?.id);
-      const { data, error } = await supabase.from('profiles').select('id, username, name, surname');
+      const { data, error } = await supabase.from('profiles').select('id, username, name, surname, avatar_url');
       if (!error && data) {
         setAllUsers(data);
       }
@@ -143,7 +142,7 @@ function DraggableSearchFAB({ setSearchVisible, onUserSelect }) {
   );
 }
 
-function SearchModal({ visible, onClose, allUsers, onUserSelect, currentUserId, isDarkMode = false }) {
+function SearchModal({ visible, onClose, allUsers, onUserSelect, currentUserId, isDarkMode = false, language = 'serbian', currentUserFriends = [] }) {
   const [searchInput, setSearchInput] = useState('');
   const [filteredUsers, setFilteredUsers] = useState([]);
 
@@ -153,25 +152,26 @@ function SearchModal({ visible, onClose, allUsers, onUserSelect, currentUserId, 
       return;
     }
     const lower = searchInput.toLowerCase();
-    setFilteredUsers(
-      allUsers.filter(
-        u =>
-          u.id !== currentUserId &&
-          (
-            (u.username && u.username.toLowerCase().includes(lower)) ||
-            (u.name && u.name.toLowerCase().includes(lower)) ||
-            (u.surname && u.surname.toLowerCase().includes(lower))
-          )
-      )
+    
+    const filtered = allUsers.filter(
+      u =>
+        u.id !== currentUserId &&
+        (
+          (u.username && u.username.toLowerCase().includes(lower)) ||
+          (u.name && u.name.toLowerCase().includes(lower)) ||
+          (u.surname && u.surname.toLowerCase().includes(lower))
+        )
     );
+    
+    setFilteredUsers(filtered);
   }, [searchInput, allUsers, currentUserId]);
 
   return (
     <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.8)', justifyContent: 'center', alignItems: 'center' }}>
-          <View style={{ borderRadius: 18, width: '85%', height: '85%', padding: 0, alignItems: 'stretch', justifyContent: 'flex-start', overflow: 'hidden', backgroundColor: isDarkMode ? '#2a3441' : '#fff' }}>
-            <View style={{ flex: 1, padding: 28 }}>
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.8)', justifyContent: 'flex-start', alignItems: 'stretch' }}>
+          <View style={{ borderRadius: 0, width: '100%', height: '100%', padding: 0, alignItems: 'stretch', justifyContent: 'flex-start', overflow: 'hidden', backgroundColor: isDarkMode ? '#2a3441' : '#fff' }}>
+            <View style={{ flex: 1, padding: 28, paddingTop: 60 }}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
                 <Text style={{ color: '#FFFF00', fontWeight: '400', fontSize: 22, letterSpacing: 0.8 }}>Pretrazi</Text>
                 <TouchableOpacity onPress={onClose}><Ionicons name="close" size={28} color={isDarkMode ? "#fff" : "#000"} /></TouchableOpacity>
@@ -191,17 +191,59 @@ function SearchModal({ visible, onClose, allUsers, onUserSelect, currentUserId, 
                 {filteredUsers.length === 0 && searchInput ? (
                   <Text style={{ color: isDarkMode ? '#b0b8c1' : '#666', fontSize: 17, textAlign: 'center', marginTop: 20 }}>Nema rezultata.</Text>
                 ) : (
-                  filteredUsers.map(user => (
-                    <TouchableOpacity key={user.id} style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 12 }} onPress={() => onUserSelect(user)}>
-                      <View style={{ width: 38, height: 38, borderRadius: 19, backgroundColor: isDarkMode ? '#2a3441' : '#F5F5F5', alignItems: 'center', justifyContent: 'center', marginRight: 14 }}>
-                        <Text style={{ color: isDarkMode ? '#fff' : '#000', fontWeight: '400', fontSize: 16, letterSpacing: 0.5 }}>{user.username?.[0]?.toUpperCase() || '?'}</Text>
-                      </View>
-                      <View>
-                        <Text style={{ color: isDarkMode ? '#fff' : '#000', fontWeight: '400', fontSize: 15, letterSpacing: 0.5 }}>{user.name} {user.surname}</Text>
-                        <Text style={{ color: '#FFFF00', fontSize: 15 }}>@{user.username}</Text>
-                      </View>
-                    </TouchableOpacity>
-                  ))
+                  filteredUsers.map(user => {
+                    // Check if profile is private AND user is not a friend
+                    const isPrivate = user.privacy_settings?.profileVisibility === 'private' && 
+                      !currentUserFriends.some(friend => 
+                        (friend.from_user === currentUserId && friend.to_user === user.id) ||
+                        (friend.to_user === currentUserId && friend.from_user === user.id)
+                      );
+                    return (
+                      <TouchableOpacity 
+                        key={user.id} 
+                        style={{ 
+                          flexDirection: 'row', 
+                          alignItems: 'center', 
+                          paddingVertical: 12,
+                          opacity: isPrivate ? 0.6 : 1
+                        }} 
+                        onPress={() => !isPrivate && onUserSelect(user)}
+                        disabled={isPrivate}
+                      >
+                        <View style={{ width: 38, height: 38, borderRadius: 19, backgroundColor: isDarkMode ? '#2a3441' : '#F5F5F5', alignItems: 'center', justifyContent: 'center', marginRight: 14 }}>
+                          {user.avatar_url ? (
+                            <Image
+                              source={{ uri: user.avatar_url }}
+                              style={{
+                                width: 38,
+                                height: 38,
+                                borderRadius: 19,
+                                resizeMode: 'cover',
+                              }}
+                            />
+                          ) : (
+                            <Text style={{ color: isDarkMode ? '#fff' : '#000', fontWeight: '400', fontSize: 16, letterSpacing: 0.5 }}>{user.username?.[0]?.toUpperCase() || '?'}</Text>
+                          )}
+                        </View>
+                        <View style={{ flex: 1 }}>
+                          <Text style={{ color: isDarkMode ? '#fff' : '#000', fontWeight: '400', fontSize: 15, letterSpacing: 0.5 }}>{user.name} {user.surname}</Text>
+                          <Text style={{ color: '#FFFF00', fontSize: 15 }}>@{user.username}</Text>
+                        </View>
+                        {isPrivate && (
+                          <View style={{ 
+                            backgroundColor: 'rgba(255, 255, 255, 0.1)', 
+                            paddingHorizontal: 12, 
+                            paddingVertical: 6, 
+                            borderRadius: 12 
+                          }}>
+                            <Text style={{ color: '#FFFF00', fontSize: 12, fontWeight: '500' }}>
+                              {language === 'english' ? 'Private' : 'Privatno'}
+                            </Text>
+                          </View>
+                        )}
+                      </TouchableOpacity>
+                    );
+                  })
                 )}
               </View>
             </View>

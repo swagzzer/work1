@@ -1,15 +1,14 @@
 import { Stack, useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import React, { createContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import DraggableSearchFAB, { SearchModal } from '../components/DraggableSearchFAB';
 import { preloadUserProfile } from '../services/profilePreload';
 import { supabase } from '../services/supabaseClient';
 import { ProfileRefreshProvider } from './context/ProfileRefreshContext';
 import { UserProfileProvider, useUserProfile } from './context/UserProfileContext';
 
-export const ThemeContext = createContext();
+
 
 SplashScreen.preventAutoHideAsync();
 
@@ -37,38 +36,13 @@ export default function RootLayout() {
   //   'mon-b': require('../assets/fonts/Montserrat-Bold.ttf'),
   // });
 
-  const [theme, setTheme] = useState('dark');
-  
-  // Load theme from AsyncStorage on mount
-  useEffect(() => {
-    const loadTheme = async () => {
-      try {
-        const savedMode = await AsyncStorage.getItem('isDarkMode');
-        if (savedMode !== null) {
-          const isDark = JSON.parse(savedMode);
-          setTheme(isDark ? 'dark' : 'light');
-        }
-      } catch (error) {
-        console.log('Error loading theme:', error);
-      }
-    };
-    loadTheme();
-  }, []);
-  
-  const toggleTheme = async () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    try {
-      await AsyncStorage.setItem('isDarkMode', JSON.stringify(newTheme === 'dark'));
-    } catch (error) {
-      console.log('Error saving theme:', error);
-    }
-  };
+
 
   const [searchVisible, setSearchVisible] = useState(false);
   const [allUsers, setAllUsers] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUserId, setCurrentUserId] = useState(null);
+  const [currentUserFriends, setCurrentUserFriends] = useState([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -103,46 +77,57 @@ export default function RootLayout() {
   useEffect(() => {
     if (!isAuthenticated) return;
     (async () => {
-      const { data, error } = await supabase.from('profiles').select('id, username, name, surname');
+      const { data, error } = await supabase.from('profiles').select('id, username, name, surname, privacy_settings, avatar_url');
       if (!error && data) setAllUsers(data);
+      
+      // Fetch current user's friends
+      if (currentUserId) {
+        const { data: friendsData, error: friendsError } = await supabase
+          .from('friends')
+          .select('*')
+          .or(`from_user.eq.${currentUserId},to_user.eq.${currentUserId}`);
+        if (!friendsError && friendsData) {
+          setCurrentUserFriends(friendsData);
+        }
+      }
     })();
-  }, [isAuthenticated]);
+  }, [isAuthenticated, currentUserId]);
 
   return (
     <ProfileRefreshProvider>
       <UserProfileProvider>
-        <ThemeContext.Provider value={{ theme, toggleTheme }}>
-          <PreloadProfileOnLogin isAuthenticated={isAuthenticated} />
-          <View style={{ flex: 1 }}>
-            <Stack>
-              <Stack.Screen name="index" options={{ headerShown: false }} />
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="(auth)/login" options={{ headerShown: false }} />
-              <Stack.Screen name="(onboarding)/sport-selection" options={{ headerShown: false }} />
-              <Stack.Screen name="logging-out" options={{ headerShown: false }} />
-              <Stack.Screen name="profile/[userId]" options={{ headerShown: false }} />
-              <Stack.Screen name="+not-found" />
-            </Stack>
-            {isAuthenticated && (
-              <>
-                <DraggableSearchFAB setSearchVisible={setSearchVisible} />
-                {searchVisible && (
-                  <SearchModal
-                    visible={searchVisible}
-                    onClose={() => setSearchVisible(false)}
-                    allUsers={allUsers}
-                    currentUserId={currentUserId}
-                    isDarkMode={theme === 'dark'}
-                    onUserSelect={(user) => {
-                      setSearchVisible(false);
-                      router.push(`/profile/${user.id}`);
-                    }}
-                  />
-                )}
-              </>
-            )}
-          </View>
-        </ThemeContext.Provider>
+        <PreloadProfileOnLogin isAuthenticated={isAuthenticated} />
+        <View style={{ flex: 1 }}>
+          <Stack>
+            <Stack.Screen name="index" options={{ headerShown: false }} />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="(auth)/login" options={{ headerShown: false }} />
+            <Stack.Screen name="(onboarding)/sport-selection" options={{ headerShown: false }} />
+            <Stack.Screen name="logging-out" options={{ headerShown: false }} />
+            <Stack.Screen name="profile/[userId]" options={{ headerShown: false }} />
+            <Stack.Screen name="+not-found" />
+          </Stack>
+          {isAuthenticated && (
+            <>
+              <DraggableSearchFAB setSearchVisible={setSearchVisible} />
+              {searchVisible && (
+                <SearchModal
+                  visible={searchVisible}
+                  onClose={() => setSearchVisible(false)}
+                  allUsers={allUsers}
+                  currentUserId={currentUserId}
+                  isDarkMode={true}
+                  language="serbian"
+                  currentUserFriends={currentUserFriends}
+                  onUserSelect={(user) => {
+                    setSearchVisible(false);
+                    router.push(`/profile/${user.id}`);
+                  }}
+                />
+              )}
+            </>
+          )}
+        </View>
       </UserProfileProvider>
     </ProfileRefreshProvider>
   );

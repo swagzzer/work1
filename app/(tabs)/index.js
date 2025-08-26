@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Animated, Button, FlatList, Image, Modal, FlatList as RNFlatList, Modal as RNModal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Animated, Button, FlatList, Image, Modal, FlatList as RNFlatList, Modal as RNModal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import QuestionnaireScreen from '../(onboarding)/questionnaire';
 import AnimatedBackground from '../../components/AnimatedBackground';
 import InviteFriendsPopup from '../../components/InviteFriendsPopup';
@@ -14,7 +14,7 @@ import Statistics from '../../components/Statistics';
 import TodaysMatches from '../../components/TodaysMatches';
 import { responsiveFontSize, scale, verticalScale } from '../../constants/Responsive';
 import { acceptFriendRequest, declineFriendRequest, getFriendRequests, getFriends, supabase, updateLastActive } from '../../services/supabaseClient';
-import { ThemeContext } from '../_layout';
+
 import { useProfileRefresh } from '../context/ProfileRefreshContext';
 
 // Language context
@@ -32,14 +32,14 @@ const LanguageProvider = ({ children }) => {
       findPlayers: 'Pronadji igrace, rezervisi teren i organizuj najbolje meceve u gradu',
       playNow: 'Igraj sada',
       notifications: 'Notifikacije',
-      todayMatches: 'Današnji mečevi',
-      noMatchesToday: 'Nema mečeva danas.',
+      todayMatches: 'Danasnji mecevi',
+      noMatchesToday: 'Nema meceva danas.',
       close: 'Zatvori',
       friendRequest: 'Zahtev za prijateljstvo',
       accept: 'Prihvati',
       decline: 'Odbij',
       rankList: 'Rank lista',
-      yourRank: 'Vaš rang: #',
+      yourRank: 'Vas rang: #',
       matchHistory: 'Istorija meceva',
       matchDetails: 'Detalji meca',
       winner: 'Pobednik',
@@ -49,7 +49,7 @@ const LanguageProvider = ({ children }) => {
       details: 'Detalji',
       padel: 'Padel',
       football: 'Fudbal',
-      basketball: 'Košarka',
+      basketball: 'Kosarka',
       tennis: 'Tenis',
     },
     english: {
@@ -126,57 +126,103 @@ function isFriendOnline(profile) {
   return (now - lastActive) < 2 * 60 * 1000;
 }
 
-function SportSelectionGrid({ sports, onSelect }) {
-  // Use the same styles and layout as the first-time login modal
+function SportSelectionGrid({ sports, onSelect, language, userSports, t }) {
   const sportImages = {
     tenis: require('../../assets/images/hero-tennis.jpg'),
     padel: require('../../assets/images/hero-padel.jpg'),
     fudbal: require('../../assets/images/hero-football.jpg'),
     kosarka: require('../../assets/images/hero-basketball.jpg'),
   };
-  const sportBoxStyle = {
-    width: 140,
+  const sportBoxStyle = (isCompleted) => ({
+    width: '100%',
+    height: 160,
     alignItems: 'center',
-    margin: 14,
-    backgroundColor: isDarkMode ? '#2a3441' : '#F5F5F5',
-    borderRadius: 24,
-    paddingVertical: 32,
-    paddingHorizontal: 10,
-    borderWidth: 2,
-    borderColor: '#FFD600',
-  };
+    justifyContent: 'center',
+    marginBottom: 8,
+    marginHorizontal: 0,
+    borderRadius: 0,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    overflow: 'hidden',
+    position: 'relative',
+  });
   const sportImageStyle = {
-    width: 110,
-    height: 110,
-    borderRadius: 14,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    opacity: 1,
   };
+  
+  const overlayStyle = (isCompleted) => ({
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    backgroundColor: isCompleted ? 'rgba(74, 144, 226, 0.2)' : 'transparent',
+  });
+  
+  const sportNameStyle = {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 24,
+    textAlign: 'center',
+    zIndex: 1,
+    textShadowColor: 'rgba(0,0,0,0.8)',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 4,
+    position: 'absolute',
+    top: 16,
+    left: 0,
+    right: 0,
+  };
+  
+  const completedTextStyle = {
+    color: '#4A90E2',
+    fontWeight: '600',
+    fontSize: 16,
+    textAlign: 'center',
+    zIndex: 1,
+    textShadowColor: 'rgba(0,0,0,0.8)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+    position: 'absolute',
+    bottom: 16,
+    left: 0,
+    right: 0,
+  };
+  
+
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
-        {sports.slice(0, 2).map(item => (
-          <TouchableOpacity
-            key={item.key}
-            style={sportBoxStyle}
-            onPress={() => onSelect(item.key)}
-          >
-            <Text style={{ color: '#FFD600', fontWeight: '400', fontSize: 16, marginBottom: 12, letterSpacing: 0.8 }} numberOfLines={1} ellipsizeMode="tail">{item.label}</Text>
-            <Image source={sportImages[item.key]} style={sportImageStyle} resizeMode="cover" />
-          </TouchableOpacity>
-        ))}
+    <ScrollView style={{ flex: 1, width: '100%' }} showsVerticalScrollIndicator={false}>
+      <View style={{ paddingTop: 20, paddingBottom: 0, paddingHorizontal: 0 }}>
+        {sports.map(item => {
+          const isCompleted = userSports && userSports.includes(item.key);
+          return (
+            <TouchableOpacity
+              key={item.key}
+              style={sportBoxStyle(isCompleted)}
+              onPress={() => !isCompleted && onSelect(item.key)}
+              disabled={isCompleted}
+            >
+              <Image source={sportImages[item.key]} style={sportImageStyle} resizeMode="cover" />
+              <View style={overlayStyle(isCompleted)} />
+              <Text style={sportNameStyle}>{item.label}</Text>
+              {isCompleted && (
+                <Text style={completedTextStyle}>
+                  {t.alreadyChosen}
+                </Text>
+              )}
+            </TouchableOpacity>
+          );
+        })}
       </View>
-      <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
-        {sports.slice(2, 4).map(item => (
-          <TouchableOpacity
-            key={item.key}
-            style={sportBoxStyle}
-            onPress={() => onSelect(item.key)}
-          >
-            <Text style={{ color: '#FFD600', fontWeight: '400', fontSize: 16, marginBottom: 12, letterSpacing: 0.8 }} numberOfLines={1} ellipsizeMode="tail">{item.label}</Text>
-            <Image source={sportImages[item.key]} style={sportImageStyle} resizeMode="cover" />
-          </TouchableOpacity>
-        ))}
-      </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -185,7 +231,7 @@ const StartScreen = () => {
   const [searchVisible, setSearchVisible] = useState(false);
   const [searchInput, setSearchInput] = useState('');
   const [searchResults, setSearchResults] = useState([]);
-  const { theme, toggleTheme } = useContext(ThemeContext);
+
   const [heroIndex, setHeroIndex] = useState(() => Math.floor(Math.random() * heroImages.length));
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const [questionnaireVisible, setQuestionnaireVisible] = useState(false);
@@ -201,6 +247,7 @@ const StartScreen = () => {
   const [friendRequests, setFriendRequests] = useState([]);
   const [requestSenders, setRequestSenders] = useState({});
   const [paymentVisible, setPaymentVisible] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState(null);
   const router = useRouter();
   // Animated opacity for subtle effect
   const opacityAnim = useRef(new Animated.Value(0)).current;
@@ -221,7 +268,7 @@ const StartScreen = () => {
   const [userProfile, setUserProfile] = useState(null);
   
   // Dark mode and language state
-  const isDarkMode = theme === 'dark';
+
   const [language, setLanguage] = useState('serbian');
   
   // Load language preferences on component mount
@@ -249,10 +296,7 @@ const StartScreen = () => {
     }
   };
   
-  // Handle dark mode toggle
-  const handleDarkModeToggle = () => {
-    toggleTheme();
-  };
+
   
   // Handle language toggle
   const handleLanguageToggle = () => {
@@ -269,7 +313,7 @@ const StartScreen = () => {
       findSport: 'NADJI SPORT.\nBILO KAD.\nBILO GDE.',
       findPlayers: 'Pronadji igrace, rezervisi teren i organizuj najbolje meceve u gradu',
       playNow: 'Igraj sada',
-      statistics: 'Statistike',
+              statistics: 'Aktivnost',
       friends: 'Prijatelji',
       seeAll: 'Vidi sve',
       noFriends: 'Nema prijatelja',
@@ -284,20 +328,37 @@ const StartScreen = () => {
       noPlayersToRate: 'Nema igraca za ocenjivanje',
       rankList: 'Rank lista',
       matchHistory: 'Istorija meceva',
+      ratePlayersTitle: 'Oceni igrače',
+      ratePlayersText: 'Ovde će biti ocenjivanje igrača.',
+      matchHistoryTitle: 'Istorija meceva',
+      rankListTitle: 'Rank lista',
       notifications: 'Notifikacije',
       noNotifications: 'Nema notifikacija.',
       friendRequest: 'Zahtev za prijateljstvo',
       accept: 'Prihvati',
       decline: 'Odbij',
       close: 'Zatvori',
+      noDataForSport: 'Nema podataka za ovaj sport.',
+      yourRank: 'Vas rang: #',
+      noMatchHistory: 'Nemate odigranih meceva.',
       onlineFriends: 'Aktivni prijatelji',
       activePlayers: 'Aktivni igraci',
+      inviteFriendsTitle: 'Pozovi prijatelje',
+      inviteFriendsDescription: 'Podeli Sastav sa svojim prijateljima!',
+      close: 'Zatvori',
+      victory: 'Pobeda',
+      defeat: 'Poraz',
+      points: 'Poeni',
+      against: 'Protiv',
+      details: 'Detalji',
       searchUsers: 'Pretraga korisnika',
       username: 'Korisnicko ime...',
       search: 'Pretraži',
       noResults: 'Nema rezultata.',
-      todayMatchesTitle: 'Današnji mečevi',
-      noMatchesTodayText: 'Nema mečeva danas.',
+      todayMatchesTitle: 'Danasnji mecevi',
+      noMatchesTodayText: 'Nema meceva danas.',
+      selectYourSport: 'Izaberi sport',
+      alreadyChosen: 'Vec izabran',
     },
     english: {
       welcome: 'Welcome to',
@@ -320,29 +381,46 @@ const StartScreen = () => {
       noPlayersToRate: 'No players to rate',
       rankList: 'Rank List',
       matchHistory: 'Match history',
+      ratePlayersTitle: 'Rate Players',
+      ratePlayersText: 'Rate players here.',
+      matchHistoryTitle: 'Match History',
+      rankListTitle: 'Rank List',
       notifications: 'Notifications',
       noNotifications: 'No notifications.',
       friendRequest: 'Friend request',
       accept: 'Accept',
       decline: 'Decline',
       close: 'Close',
+      noDataForSport: 'No data for this sport.',
+      yourRank: 'Your rank: #',
+      noMatchHistory: 'You have no played matches.',
       onlineFriends: 'Active friends',
       activePlayers: 'Active players',
+      inviteFriendsTitle: 'Invite Friends',
+      inviteFriendsDescription: 'Share Sastav with your friends!',
+      close: 'Close',
+      victory: 'Victory',
+      defeat: 'Defeat',
+      points: 'Points',
+      against: 'Against',
+      details: 'Details',
       searchUsers: 'Search users',
       username: 'Username...',
       search: 'Search',
       noResults: 'No results.',
       todayMatchesTitle: 'Today\'s matches',
       noMatchesTodayText: 'No matches today.',
+      selectYourSport: 'Select Your Sport',
+      alreadyChosen: 'Already chosen',
     }
   };
   
   const t = translations[language];
   const ALL_SPORTS = [
-    { key: 'padel', label: 'Padel' },
-    { key: 'fudbal', label: 'Fudbal' },
-    { key: 'kosarka', label: 'Košarka' },
-    { key: 'tenis', label: 'Tenis' },
+    { key: 'padel', label: language === 'english' ? 'Padel' : 'Padel' },
+    { key: 'fudbal', label: language === 'english' ? 'Football' : 'Fudbal' },
+    { key: 'kosarka', label: language === 'english' ? 'Basketball' : 'Kosarka' },
+    { key: 'tenis', label: language === 'english' ? 'Tennis' : 'Tenis' },
   ];
   // Add state for match history
   const [matchHistoryBySport, setMatchHistoryBySport] = useState({}); // { padel: [], fudbal: [], kosarka: [], tenis: [] }
@@ -375,34 +453,43 @@ const StartScreen = () => {
 
   // Fetch completed sports from user_sport_ranks table
   const refetchUserSports = useCallback(async () => {
-    const user = (await supabase.auth.getUser()).data.user;
-    if (!user) return;
+    if (!currentUserId) return;
     const { data: completedRanks } = await supabase
       .from('user_sport_ranks')
       .select('sport')
-      .eq('user_id', user.id);
+      .eq('user_id', currentUserId);
     let sports = completedRanks ? completedRanks.map(q => q.sport) : [];
     setUserSports(sports);
-  }, []);
+  }, [currentUserId]);
 
   useEffect(() => {
     refetchUserSports();
+  }, [refetchUserSports]);
+
+  // Set currentUserId when component mounts
+  useEffect(() => {
+    const setUser = async () => {
+      const user = (await supabase.auth.getUser()).data.user;
+      if (user) {
+        setCurrentUserId(user.id);
+      }
+    };
+    setUser();
   }, []);
 
   useEffect(() => {
+    if (!currentUserId) return;
     (async () => {
-      const user = (await supabase.auth.getUser()).data.user;
-      if (!user) return;
       // Check if user has any sport ranks
       const { data: ranks } = await supabase
         .from('user_sport_ranks')
         .select('id')
-        .eq('user_id', user.id);
+        .eq('user_id', currentUserId);
       if (!ranks || ranks.length === 0) {
         setShowFirstTimeSportModal(true);
       }
     })();
-  }, []);
+  }, [currentUserId]);
 
   const availableSports = ALL_SPORTS.filter(s => !userSports.includes(s.key));
 
@@ -440,21 +527,21 @@ const StartScreen = () => {
     setNotificationsVisible(true);
     // Always re-fetch friend requests when opening notifications
     (async () => {
-      const user = (await supabase.auth.getUser()).data.user;
-      const reqRes = await getFriendRequests(user.id);
+      if (!currentUserId) return;
+      const reqRes = await getFriendRequests(currentUserId);
       setFriendRequests(reqRes.data || []);
       fetchRequestSenders(reqRes.data || []);
     })();
-  }, [fetchRequestSenders]);
+  }, [fetchRequestSenders, currentUserId]);
 
   // After accepting, re-fetch requests and friends
   const handleAcceptRequest = async (requestId) => {
     await acceptFriendRequest(requestId);
     // Re-fetch friend requests and friends
-    const user = (await supabase.auth.getUser()).data.user;
-    const reqRes = await getFriendRequests(user.id);
+    if (!currentUserId) return;
+    const reqRes = await getFriendRequests(currentUserId);
     setFriendRequests(reqRes.data || []);
-    const friendsRes = await getFriends(user.id);
+    const friendsRes = await getFriends(currentUserId);
     setFriends(friendsRes.data || []);
     setNotificationsVisible(false);
   };
@@ -464,11 +551,11 @@ const StartScreen = () => {
     const { error } = await declineFriendRequest(requestId);
     if (error) {
       console.error('Error declining request:', error);
-      Alert.alert('Greška', 'Ne možete odbiti zahtev: ' + error.message);
+      Alert.alert('Greška', 'Ne mozete odbiti zahtev: ' + error.message);
     }
     // Re-fetch friend requests
-    const user = (await supabase.auth.getUser()).data.user;
-    const reqRes = await getFriendRequests(user.id);
+    if (!currentUserId) return;
+    const reqRes = await getFriendRequests(currentUserId);
     setFriendRequests(reqRes.data || []);
   };
 
@@ -480,84 +567,97 @@ const StartScreen = () => {
 
   // Real-time subscription for friend requests
   useEffect(() => {
-    (async () => {
-      const user = (await supabase.auth.getUser()).data.user;
-      if (!user) return;
+    if (!currentUserId) return;
+    
+    // Subscribe to INSERT and DELETE events on friend_requests where to_user or from_user = current user
+    const channel = supabase
+      .channel('friend-requests-' + currentUserId)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'friend_requests',
+          filter: `to_user=eq.${currentUserId}`,
+        },
+        (payload) => {
+          // Re-fetch friend requests
+          getFriendRequests(currentUserId).then(res => setFriendRequests(res.data || []));
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'friend_requests',
+          filter: `to_user=eq.${currentUserId}`,
+        },
+        (payload) => {
+          // Re-fetch friend requests
+          getFriendRequests(currentUserId).then(res => setFriendRequests(res.data || []));
+        }
+      )
+      .subscribe();
 
-      // Subscribe to INSERT and DELETE events on friend_requests where to_user or from_user = current user
-      const channel = supabase
-        .channel('friend-requests-' + user.id)
-        .on(
-          'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'friend_requests',
-            filter: `to_user=eq.${user.id}`,
-          },
-          (payload) => {
-            // Re-fetch friend requests
-            getFriendRequests(user.id).then(res => setFriendRequests(res.data || []));
-          }
-        )
-        .on(
-          'postgres_changes',
-          {
-            event: 'DELETE',
-            schema: 'public',
-            table: 'friend_requests',
-            filter: `to_user=eq.${user.id}`,
-          },
-          (payload) => {
-            // Re-fetch friend requests
-            getFriendRequests(user.id).then(res => setFriendRequests(res.data || []));
-          }
-        )
-        .subscribe();
-
-      return () => {
-        supabase.removeChannel(channel);
-      };
-    })();
-  }, []);
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [currentUserId]);
 
   useEffect(() => {
-    fetchRequestSenders(friendRequests);
-  }, [friendRequests, fetchRequestSenders]);
+    if (!currentUserId) return;
+    
+    let isMounted = true;
+    (async () => {
+      const fetchRequests = async () => {
+        const res = await getFriendRequests(currentUserId);
+        if (isMounted) setFriendRequests(res.data || []);
+      };
+
+      fetchRequests(); // Fetch immediately
+      const interval = setInterval(fetchRequests, 2000); // Fetch every 2 seconds
+
+      return () => {
+        isMounted = false;
+        clearInterval(interval);
+      };
+    })();
+  }, [currentUserId]);
 
   useEffect(() => {
     const fetchStats = async () => {
       // Remove matches count and locations logic
       // Fetch friends for current user
-      const user = (await supabase.auth.getUser()).data.user;
+      if (!currentUserId) return; // Wait for currentUserId to be set
+      
       let friendsCount = 0;
       let allFriendsWithProfiles = [];
       let onlineFriendsList = [];
-      if (user) {
-        const friendsRes = await getFriends(user.id);
-        const friendsList = friendsRes.data || [];
-        setFriends(friendsList);
-        friendsCount = friendsList.length;
-        // Get friend user IDs
-        const friendIds = friendsList.map(f => f.from_user === user.id ? f.to_user : f.from_user);
-        let profiles = [];
-        if (friendIds.length > 0) {
-          // Fetch all profiles for friends
-          const { data: profileData } = await supabase
-            .from('profiles')
-            .select('id, username, name, surname, last_active, avatar_url')
-            .in('id', friendIds);
-          profiles = profileData || [];
-        }
-        // Attach profile to each friend
-        allFriendsWithProfiles = friendsList.map(f => {
-          const fid = f.from_user === user.id ? f.to_user : f.from_user;
-          return { ...f, profile: profiles.find(p => p.id === fid) };
-        });
-        // Online friends (for statistics)
-        onlineFriendsList = allFriendsWithProfiles.filter(f => isFriendOnline(f.profile));
-        setOnlineFriends(onlineFriendsList);
+      
+      const friendsRes = await getFriends(currentUserId);
+      const friendsList = friendsRes.data || [];
+      setFriends(friendsList);
+      friendsCount = friendsList.length;
+      // Get friend user IDs
+      const friendIds = friendsList.map(f => f.from_user === currentUserId ? f.to_user : f.from_user);
+      let profiles = [];
+      if (friendIds.length > 0) {
+        // Fetch all profiles for friends
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('id, username, name, surname, last_active, avatar_url')
+          .in('id', friendIds);
+        profiles = profileData || [];
       }
+      // Attach profile to each friend
+      allFriendsWithProfiles = friendsList.map(f => {
+        const fid = f.from_user === currentUserId ? f.to_user : f.from_user;
+        return { ...f, profile: profiles.find(p => p.id === fid) };
+      });
+      // Online friends (for statistics)
+      onlineFriendsList = allFriendsWithProfiles.filter(f => isFriendOnline(f.profile));
+      setOnlineFriends(onlineFriendsList);
       // Fetch all users active in the last 2 minutes
       const { count: activeCount } = await supabase
         .from('profiles')
@@ -574,7 +674,7 @@ const StartScreen = () => {
     fetchStats();
     const statsInterval = setInterval(fetchStats, 5000); // fetch stats every 5 seconds
     return () => clearInterval(statsInterval);
-  }, []);
+  }, [currentUserId]);
 
   useEffect(() => {
     fetchMatches(); // Initial fetch
@@ -622,25 +722,15 @@ const StartScreen = () => {
         return (
           <View style={{ width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: scale(38), marginBottom: verticalScale(18), paddingHorizontal: scale(16) }}>
             <View style={{ marginLeft: scale(12) }}>
-              <Text style={{ color: isDarkMode ? '#fff' : '#000', fontWeight: '300', fontSize: responsiveFontSize(14), marginBottom: scale(2) }}>{t.welcome}</Text>
+                              <Text style={{ color: '#fff', fontWeight: '300', fontSize: responsiveFontSize(14), marginBottom: scale(2) }}>{t.welcome}</Text>
               <Text style={{ color: '#FFFF00', fontWeight: '300', fontSize: responsiveFontSize(22), letterSpacing: 0.8 }}>{t.sastav}</Text>
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              {/* Dark Mode Toggle */}
-              <TouchableOpacity 
-                style={{ backgroundColor: isDarkMode ? '#2a3441' : '#F5F5F5', borderRadius: scale(8), padding: scale(8), marginRight: scale(8), minWidth: scale(38), minHeight: scale(38), justifyContent: 'center', alignItems: 'center' }}
-                onPress={handleDarkModeToggle}
-              >
-                <Ionicons 
-                  name={isDarkMode ? "sunny" : "moon"} 
-                  size={scale(22)} 
-                  color="#FFFF00" 
-                />
-              </TouchableOpacity>
+
               
               {/* Language Toggle */}
               <TouchableOpacity 
-                style={{ backgroundColor: isDarkMode ? '#2a3441' : '#F5F5F5', borderRadius: scale(8), padding: scale(8), marginRight: scale(8), minWidth: scale(38), minHeight: scale(38), justifyContent: 'center', alignItems: 'center' }}
+                                  style={{ backgroundColor: '#2a3441', borderRadius: scale(8), padding: scale(8), marginRight: scale(8), minWidth: scale(38), minHeight: scale(38), justifyContent: 'center', alignItems: 'center' }}
                 onPress={handleLanguageToggle}
               >
                 <Text style={{ color: '#FFFF00', fontSize: responsiveFontSize(14), fontWeight: '300', letterSpacing: 0.5 }}>
@@ -650,7 +740,7 @@ const StartScreen = () => {
               
               {/* Notifications */}
               <TouchableOpacity 
-                style={{ backgroundColor: isDarkMode ? '#2a3441' : '#F5F5F5', borderRadius: scale(8), padding: scale(8), position: 'relative', marginRight: scale(8), minWidth: scale(38), minHeight: scale(38), justifyContent: 'center', alignItems: 'center' }}
+                                  style={{ backgroundColor: '#2a3441', borderRadius: scale(8), padding: scale(8), position: 'relative', marginRight: scale(8), minWidth: scale(38), minHeight: scale(38), justifyContent: 'center', alignItems: 'center' }}
                 onPress={openNotifications}
               >
                 <Ionicons name="notifications-outline" size={scale(22)} color="#FFFF00" />
@@ -675,7 +765,7 @@ const StartScreen = () => {
               
               {/* Add Button */}
               <TouchableOpacity
-                style={{ backgroundColor: isDarkMode ? '#2a3441' : '#F5F5F5', borderRadius: scale(8), padding: scale(8), minWidth: scale(38), minHeight: scale(38), justifyContent: 'center', alignItems: 'center' }}
+                style={{ backgroundColor: '#2a3441', borderRadius: scale(8), padding: scale(8), minWidth: scale(38), minHeight: scale(38), justifyContent: 'center', alignItems: 'center' }}
                 onPress={() => { setShowSportSelectionModal(true); setSelectedSport(null); }}
               >
                 <Ionicons name="add" size={scale(22)} color="#FFFF00" />
@@ -685,54 +775,79 @@ const StartScreen = () => {
         );
       case 'hero':
         return (
-          <View style={{ width: '100%', alignItems: 'center', marginTop: scale(0), marginBottom: scale(8) }}>
-            <View style={{ flexDirection: 'row', width: scale(340), borderRadius: scale(18), overflow: 'hidden', backgroundColor: isDarkMode ? '#2a3441' : '#F5F5F5', marginBottom: scale(0), alignItems: 'center', padding: scale(0) }}>
-              <View style={{ flex: 1, paddingVertical: scale(14), paddingHorizontal: scale(18), justifyContent: 'flex-start' }}>
-                <Text
-                  style={{
-                    color: '#FFFF00',
-                    fontWeight: '300',
-                    fontSize: 16,
-                    marginBottom: 4,
-                    lineHeight: 20,
-                    textAlign: 'left',
-                    letterSpacing: 1.0,
-                  }}
-                >
-                  {t.findSport}
-                </Text>
-                <Text
-                  style={{
-                    color: isDarkMode ? '#fff' : '#000',
-                    fontSize: 13,
-                    marginBottom: 8,
-                    lineHeight: 16,
-                    fontWeight: '300',
-                    letterSpacing: 0.5,
-                  }}
-                >
-                  {t.findPlayers}
-                </Text>
-                <TouchableOpacity
-                  style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: isDarkMode ? '#2a3441' : '#F5F5F5', borderRadius: scale(8), paddingVertical: scale(7), paddingHorizontal: scale(16), alignSelf: 'flex-start', elevation: 2 }}
-                  onPress={() => router.push('/matches')}
-                >
-                  <Ionicons name="play" size={scale(15)} color="#FFFF00" style={{ marginRight: scale(6) }} />
-                  <Text style={{ color: '#FFFF00', fontWeight: '400', fontSize: 13, letterSpacing: 0.8 }}>{t.playNow}</Text>
-                </TouchableOpacity>
+          <View style={{ width: '100%', marginTop: scale(0), marginBottom: scale(8) }}>
+            <View style={{ width: '100%', height: scale(156), position: 'relative' }}>
+              {/* Background Image */}
+              <Image 
+                source={heroImages[heroIndex]} 
+                style={{ 
+                  width: '100%', 
+                  height: '100%', 
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  resizeMode: 'cover'
+                }} 
+              />
+              {/* Dark overlay for better text readability */}
+              <View style={{ 
+                position: 'absolute', 
+                top: 0, 
+                left: 0, 
+                width: '100%', 
+                height: '100%', 
+                backgroundColor: 'rgba(0, 0, 0, 0.4)' 
+              }} />
+              
+              {/* Content */}
+              <View style={{ flexDirection: 'row', width: '100%', height: '100%', alignItems: 'center', padding: scale(0), zIndex: 1 }}>
+                <View style={{ flex: 1, paddingVertical: scale(32), paddingHorizontal: scale(18), justifyContent: 'flex-start' }}>
+                  <Text
+                    style={{
+                      color: '#FFFF00',
+                      fontWeight: '300',
+                      fontSize: 16,
+                      marginBottom: 4,
+                      lineHeight: 20,
+                      textAlign: 'left',
+                      letterSpacing: 1.0,
+                    }}
+                  >
+                    {t.findSport}
+                  </Text>
+                  <Text
+                    style={{
+                      color: '#fff',
+                      fontSize: 13,
+                      marginBottom: 8,
+                      lineHeight: 16,
+                      fontWeight: '300',
+                      letterSpacing: 0.5,
+                    }}
+                  >
+                    {t.findPlayers}
+                  </Text>
+                  <TouchableOpacity
+                    style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#2a3441', borderRadius: scale(8), paddingVertical: scale(3), paddingHorizontal: scale(8), alignSelf: 'flex-start', elevation: 2, borderWidth: 0.5, borderColor: '#FFFF00' }}
+                    onPress={() => router.push('/matches')}
+                  >
+                    <Ionicons name="play" size={scale(15)} color="#FFFF00" style={{ marginRight: scale(6) }} />
+                    <Text style={{ color: '#FFFF00', fontWeight: '400', fontSize: 13, letterSpacing: 0.8 }}>{t.playNow}</Text>
+                  </TouchableOpacity>
+                </View>
+                <Animated.View style={{ marginRight: scale(18), alignItems: 'center', justifyContent: 'center' }}>
+                  <Image source={require('../../assets/images/logo.png')} style={{ width: 80, height: 80, borderRadius: 18 }} resizeMode="contain" />
+                </Animated.View>
               </View>
-              <Animated.View style={{ marginRight: scale(18), alignItems: 'center', justifyContent: 'center' }}>
-                <Image source={heroImages[heroIndex]} style={{ width: 64, height: 64, borderRadius: 14, backgroundColor: '#FFFF00' }} resizeMode="cover" />
-              </Animated.View>
             </View>
           </View>
         );
       case 'stats':
-        return <Statistics stats={{ active: activeUsersCount }} onlineFriendsCount={onlineFriends.length} isDarkMode={isDarkMode} t={t} />;
+        return <Statistics stats={{ active: activeUsersCount }} onlineFriendsCount={onlineFriends.length} isDarkMode={true} t={t} />;
       case 'friends':
-        return <OnlineFriends key={refreshKey} friends={friendsPreview.preview} allFriends={friendsPreview.all} isDarkMode={isDarkMode} t={t} />;
+                          return <OnlineFriends key={refreshKey} friends={friendsPreview.preview} allFriends={friendsPreview.all} isDarkMode={true} t={t} />;
       case 'matches':
-        return <TodaysMatches matches={matchesToday} onSeeAll={() => setAllMatchesVisible(true)} isDarkMode={isDarkMode} t={t} />;
+                          return <TodaysMatches matches={matchesToday} onSeeAll={() => setAllMatchesVisible(true)} isDarkMode={true} t={t} />;
       case 'actions':
         return (
           <QuickActions
@@ -740,7 +855,7 @@ const StartScreen = () => {
             onRatePlayers={() => setRatePlayersVisible(true)}
             onShowRankList={() => setShowRankList(true)}
             onShowMatchHistory={() => setShowMatchHistory(true)}
-            isDarkMode={isDarkMode}
+            isDarkMode={true}
             t={t}
           />
         );
@@ -760,28 +875,6 @@ const StartScreen = () => {
     }
   }
 
-  // Polling: Refetch friend requests every 2 seconds for both received and deleted requests
-  useEffect(() => {
-    let isMounted = true;
-    (async () => {
-      const user = (await supabase.auth.getUser()).data.user;
-      if (!user) return;
-
-      const fetchRequests = async () => {
-        const res = await getFriendRequests(user.id);
-        if (isMounted) setFriendRequests(res.data || []);
-      };
-
-      fetchRequests(); // Fetch immediately
-      const interval = setInterval(fetchRequests, 2000); // Fetch every 2 seconds
-
-      return () => {
-        isMounted = false;
-        clearInterval(interval);
-      };
-    })();
-  }, []);
-
   // Map sport keys to images
   const sportImages = {
     tenis: require('../../assets/images/hero-tennis.jpg'),
@@ -795,7 +888,7 @@ const StartScreen = () => {
     width: 140,
     alignItems: 'center',
     margin: 14,
-    backgroundColor: isDarkMode ? '#2a3441' : '#F5F5F5',
+    backgroundColor: '#2a3441',
     borderRadius: 24,
     paddingVertical: 32,
     paddingHorizontal: 10,
@@ -851,12 +944,11 @@ const StartScreen = () => {
       if (isMounted) {
         setRankListBySport(newRankLists);
         // Set user rank and profile for the selected sport
-        const user = (await supabase.auth.getUser()).data.user;
-        if (user) {
+        if (currentUserId) {
           const merged = newRankLists[rankSport] || [];
-          const idx = merged.findIndex(r => r.user_id === user.id);
+          const idx = merged.findIndex(r => r.user_id === currentUserId);
           setUserRank(idx >= 0 ? idx + 1 : null);
-          setUserProfile(merged.find(r => r.user_id === user.id)?.profile || null);
+          setUserProfile(merged.find(r => r.user_id === currentUserId)?.profile || null);
         } else {
           setUserRank(null);
           setUserProfile(null);
@@ -865,22 +957,16 @@ const StartScreen = () => {
       }
     })();
     return () => { isMounted = false; };
-  }, [showRankList]);
+  }, [showRankList, currentUserId]);
 
   // Update fetch match history logic to use the new RPC for padel doubles
   useEffect(() => {
-    if (!showMatchHistory) return;
+    if (!showMatchHistory || !currentUserId) return;
     let isMounted = true;
     (async () => {
       setMatchHistoryLoading(true);
-      const user = (await supabase.auth.getUser()).data.user;
-      if (!user) {
-        setMatchHistoryBySport({});
-        setMatchHistoryLoading(false);
-        return;
-      }
-      const fetchPadel = supabase.rpc('get_padel_doubles_history', { user_id_param: user.id });
-      const fetchOther = (sport) => supabase.rpc('get_match_history_with_opponents', { user_id_param: user.id, sport_param: sport });
+      const fetchPadel = supabase.rpc('get_padel_doubles_history', { user_id_param: currentUserId });
+      const fetchOther = (sport) => supabase.rpc('get_match_history_with_opponents', { user_id_param: currentUserId, sport_param: sport });
       const sports = ['padel', 'fudbal', 'kosarka', 'tenis'];
       const promises = [
         fetchPadel,
@@ -901,12 +987,12 @@ const StartScreen = () => {
       }
     })();
     return () => { isMounted = false; };
-  }, [showMatchHistory]);
+  }, [showMatchHistory, currentUserId]);
 
   const isTeam1Winner = detailWinners.length > 0 && detailWinners[0].result === 'win';
 
   return (
-    <AnimatedBackground isDarkMode={isDarkMode}>
+            <AnimatedBackground>
       <View style={{ flex: 1 }}>
         <FlatList
           data={sections}
@@ -918,16 +1004,16 @@ const StartScreen = () => {
 
         <Modal visible={searchVisible} animationType="slide" transparent>
           <View style={styles.modalBg}>
-            <View style={[styles.modalContent, { backgroundColor: isDarkMode ? '#232b3b' : '#FFFFFF' }]}>
-              <Text style={[styles.title, { color: isDarkMode ? '#fff' : '#000' }]}>{t.searchUsers}</Text>
+                          <View style={[styles.modalContent, { backgroundColor: '#232b3b' }]}>
+                              <Text style={[styles.title, { color: '#fff' }]}>{t.searchUsers}</Text>
               <TextInput
-                style={[styles.input, { 
-                  backgroundColor: isDarkMode ? '#2a3441' : '#F5F5F5',
-                  color: isDarkMode ? '#fff' : '#000',
-                  borderColor: isDarkMode ? '#444' : '#ddd'
-                }]}
+                                  style={[styles.input, { 
+                    backgroundColor: '#2a3441',
+                    color: '#fff',
+                    borderColor: '#444'
+                  }]}
                 placeholder={t.username}
-                placeholderTextColor={isDarkMode ? '#b0b8c1' : '#666'}
+                                  placeholderTextColor="#b0b8c1"
                 value={searchInput}
                 onChangeText={setSearchInput}
               />
@@ -942,7 +1028,7 @@ const StartScreen = () => {
                     </Text>
                   </TouchableOpacity>
                 )}
-                ListEmptyComponent={<Text style={[styles.friendEmpty, { color: isDarkMode ? '#fff' : '#000' }]}>{t.noResults}</Text>}
+                                  ListEmptyComponent={<Text style={[styles.friendEmpty, { color: '#fff' }]}>{t.noResults}</Text>}
                 style={{ width: '100%' }}
               />
               <Button title="Zatvori" onPress={() => setSearchVisible(false)} />
@@ -953,19 +1039,19 @@ const StartScreen = () => {
         {/* All Matches Modal */}
         <RNModal visible={allMatchesVisible} transparent animationType="slide" onRequestClose={() => setAllMatchesVisible(false)}>
           <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center' }}>
-            <View style={{ backgroundColor: isDarkMode ? '#232b3b' : '#FFFFFF', borderRadius: scale(16), padding: scale(28), width: scale(340), alignItems: 'center', maxHeight: scale(500) }}>
-              <Text style={{ color: isDarkMode ? '#fff' : '#000', fontWeight: '400', fontSize: responsiveFontSize(17), marginBottom: scale(16), letterSpacing: 0.8 }}>{t.todayMatchesTitle}</Text>
+                            <View style={{ backgroundColor: '#232b3b', borderRadius: scale(16), padding: scale(28), width: scale(340), alignItems: 'center', maxHeight: scale(500) }}>
+                              <Text style={{ color: '#fff', fontWeight: '400', fontSize: responsiveFontSize(17), marginBottom: scale(16), letterSpacing: 0.8 }}>{t.todayMatchesTitle}</Text>
               {matchesToday.length === 0 ? (
-                <Text style={{ color: isDarkMode ? '#b0b8c1' : '#666', fontSize: responsiveFontSize(15), marginBottom: scale(24) }}>{t.noMatchesTodayText}</Text>
+                                  <Text style={{ color: '#b0b8c1', fontSize: responsiveFontSize(15), marginBottom: scale(24) }}>{t.noMatchesTodayText}</Text>
               ) : (
                 <FlatList
                   data={matchesToday}
                   keyExtractor={item => item.id}
                   renderItem={({ item }) => (
-                    <View style={{ backgroundColor: isDarkMode ? '#2a3441' : '#F5F5F5', borderRadius: scale(12), padding: scale(14), marginBottom: scale(10) }}>
-                      <Text style={{ color: isDarkMode ? '#fff' : '#000', fontWeight: '400', fontSize: responsiveFontSize(14), letterSpacing: 0.5 }}>{item.location}</Text>
-                      <Text style={{ color: isDarkMode ? '#b0b8c1' : '#666', fontSize: responsiveFontSize(13) }}>{item.name}</Text>
-                      <Text style={{ color: isDarkMode ? '#b0b8c1' : '#666', fontSize: responsiveFontSize(13) }}>{new Date(item.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+                    <View style={{ backgroundColor: '#2a3441', borderRadius: scale(12), padding: scale(14), marginBottom: scale(10) }}>
+                                              <Text style={{ color: '#fff', fontWeight: '400', fontSize: responsiveFontSize(14), letterSpacing: 0.5 }}>{item.location}</Text>
+                        <Text style={{ color: '#b0b8c1', fontSize: responsiveFontSize(13) }}>{item.name}</Text>
+                        <Text style={{ color: '#b0b8c1', fontSize: responsiveFontSize(13) }}>{new Date(item.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
                     </View>
                   )}
                 />
@@ -977,19 +1063,21 @@ const StartScreen = () => {
           </View>
         </RNModal>
         {/* Invite Friends Modal */}
-        <InviteFriendsPopup
-          visible={inviteFriendsVisible}
-          onClose={() => setInviteFriendsVisible(false)}
-          isDarkMode={isDarkMode}
-        />
+                  <InviteFriendsPopup
+            visible={inviteFriendsVisible}
+            onClose={() => setInviteFriendsVisible(false)}
+            isDarkMode={true}
+            language={language}
+            t={t}
+          />
         {/* Rate Players Modal */}
         <PlaceholderModal
           visible={ratePlayersVisible}
           onClose={() => setRatePlayersVisible(false)}
-          title="Oceni igrače"
-          text="Ovde će biti ocenjivanje igrača."
+          title={t.ratePlayersTitle}
+          text={t.ratePlayersText}
           language={language}
-          isDarkMode={isDarkMode}
+          isDarkMode={true}
         />
 
         {/* Notifications Modal */}
@@ -1001,7 +1089,7 @@ const StartScreen = () => {
         >
           <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.7)' }}>
             <View style={{ flex: 1, borderRadius: 0, overflow: 'hidden', paddingTop: 48, alignItems: 'center', elevation: 8 }}>
-              <AnimatedBackground isDarkMode={isDarkMode} />
+              <AnimatedBackground />
               <View style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
                 <View style={{ width: '100%', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 24, marginBottom: 16, marginTop: 48 }}>
                   <Text style={{ color: '#FFFF00', fontWeight: '400', fontSize: 18, textAlign: 'left', letterSpacing: 0.8 }}>{t.notifications}</Text>
@@ -1011,7 +1099,7 @@ const StartScreen = () => {
                 </View>
                 <View style={{ width: '100%', flex: 1, paddingHorizontal: 24, paddingBottom: 24 }}>
                   {friendRequests.length === 0 ? (
-                    <Text style={{ color: isDarkMode ? '#b0b8c1' : '#666', fontSize: 17, textAlign: 'center', marginTop: 20 }}>{t.noNotifications}</Text>
+                    <Text style={{ color: '#b0b8c1', fontSize: 17, textAlign: 'center', marginTop: 20 }}>{t.noNotifications}</Text>
                   ) : (
                     <FlatList
                       data={friendRequests}
@@ -1021,20 +1109,20 @@ const StartScreen = () => {
                         return (
                           <View key={item.id} style={{ marginBottom: 18 }}>
                             <Text style={{ color: '#FFFF00', fontWeight: 'bold', fontSize: 16, textAlign: 'center', marginBottom: 6 }}>{t.friendRequest}</Text>
-                            <View style={{ backgroundColor: isDarkMode ? 'rgba(35,43,59,0.7)' : 'rgba(245,245,245,0.9)', borderRadius: 12, padding: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <View style={{ backgroundColor: 'rgba(35,43,59,0.7)', borderRadius: 12, padding: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                               <View>
-                                <Text style={{ color: isDarkMode ? '#fff' : '#000', fontSize: 17 }}>
+                                <Text style={{ color: '#fff', fontSize: 17 }}>
                                   {sender ? `${sender.name || ''} ${sender.surname || ''}`.trim() : item.from_user}
                                 </Text>
                                 {sender && (
-                                  <Text style={{ color: isDarkMode ? '#b0b8c1' : '#666', fontSize: 15 }}>@{sender.username}</Text>
+                                  <Text style={{ color: '#b0b8c1', fontSize: 15 }}>@{sender.username}</Text>
                                 )}
                               </View>
                               <View style={{ flexDirection: 'row' }}>
                                                                   <TouchableOpacity style={{ backgroundColor: '#FFFF00', borderRadius: 6, paddingVertical: 6, paddingHorizontal: 14, marginRight: 6 }} onPress={() => handleAcceptRequest(item.id)}>
                                     <Text style={{ color: '#181818', fontWeight: 'bold', fontSize: 14 }}>{t.accept}</Text>
                                   </TouchableOpacity>
-                                  <TouchableOpacity style={{ backgroundColor: isDarkMode ? '#2a3441' : '#F5F5F5', borderRadius: 6, paddingVertical: 6, paddingHorizontal: 14, borderWidth: 1, borderColor: '#FFFF00' }} onPress={() => handleDeclineRequest(item.id)}>
+                                  <TouchableOpacity style={{ backgroundColor: '#2a3441', borderRadius: 6, paddingVertical: 6, paddingHorizontal: 14, borderWidth: 1, borderColor: '#FFFF00' }} onPress={() => handleDeclineRequest(item.id)}>
                                     <Text style={{ color: '#FFFF00', fontWeight: 'bold', fontSize: 14 }}>{t.decline}</Text>
                                   </TouchableOpacity>
                               </View>
@@ -1070,18 +1158,20 @@ const StartScreen = () => {
           transparent
           onRequestClose={() => setShowSportSelectionModal(false)}
         >
-          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.7)' }}>
-            <View style={{ width: 370, height: 600, borderRadius: 18, overflow: 'hidden', alignItems: 'stretch', justifyContent: 'flex-start', backgroundColor: 'transparent', position: 'relative' }}>
-              <AnimatedBackground />
-              <View style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', padding: 24, borderRadius: 18 }}>
-                <TouchableOpacity onPress={() => setShowSportSelectionModal(false)} style={{ position: 'absolute', top: 12, right: 12, zIndex: 2 }}>
-                  <Ionicons name="close" size={28} color="#fff" />
-                </TouchableOpacity>
-                <View style={{ width: '100%', alignItems: 'flex-start', marginBottom: 0 }}>
-                  <Text style={{ color: '#FFD600', fontWeight: '400', fontSize: 20, textAlign: 'left', letterSpacing: 0.8 }}>Izaberi sport</Text>
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+            <View style={{ width: '100%', height: '100%', borderRadius: 0, overflow: 'hidden', alignItems: 'stretch', justifyContent: 'flex-start', backgroundColor: '#2a3441', position: 'relative' }}>
+              <View style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', paddingTop: 40, paddingHorizontal: 0, borderRadius: 0, backgroundColor: '#2a3441' }}>
+                                  <TouchableOpacity onPress={() => setShowSportSelectionModal(false)} style={{ position: 'absolute', top: 60, right: 20, zIndex: 2 }}>
+                    <Ionicons name="close" size={28} color="#fff" />
+                  </TouchableOpacity>
+                <View style={{ width: '100%', alignItems: 'flex-start', marginBottom: 0, marginTop: 20, marginHorizontal: 0, paddingHorizontal: 0 }}>
+                  <Text style={{ color: '#fff', fontWeight: '600', fontSize: 24, textAlign: 'left', letterSpacing: 0.8, marginBottom: 20, marginLeft: 20 }}>{t.selectYourSport}</Text>
                 </View>
                 <SportSelectionGrid
-                  sports={availableSports}
+                  sports={ALL_SPORTS}
+                  language={language}
+                  userSports={userSports}
+                  t={t}
                   onSelect={sport => {
                     setShowSportSelectionModal(false);
                     setTimeout(() => {
@@ -1101,13 +1191,12 @@ const StartScreen = () => {
           transparent
           onRequestClose={() => setShowQuestionnaireModal(false)}
         >
-          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.7)' }}>
-            <View style={{ width: '85%', height: '85%', borderRadius: 18, overflow: 'hidden', alignItems: 'stretch', justifyContent: 'flex-start', backgroundColor: 'transparent', position: 'relative' }}>
-              <AnimatedBackground />
-              <View style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', padding: 24, borderRadius: 18 }}>
-                <TouchableOpacity onPress={() => setShowQuestionnaireModal(false)} style={{ position: 'absolute', top: 12, right: 12, zIndex: 2 }}>
-                  <Ionicons name="close" size={28} color="#fff" />
-                </TouchableOpacity>
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+            <View style={{ width: '100%', height: '100%', borderRadius: 0, overflow: 'hidden', alignItems: 'stretch', justifyContent: 'flex-start', backgroundColor: '#2a3441', position: 'relative' }}>
+              <View style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', padding: 24, borderRadius: 0, backgroundColor: '#2a3441' }}>
+                                  <TouchableOpacity onPress={() => setShowQuestionnaireModal(false)} style={{ position: 'absolute', top: 60, right: 24, zIndex: 2 }}>
+                    <Ionicons name="close" size={28} color="#FFFF00" />
+                  </TouchableOpacity>
                 <QuestionnaireScreen
                   key={selectedSport}
                   initialSport={selectedSport}
@@ -1136,10 +1225,13 @@ const StartScreen = () => {
               <AnimatedBackground />
               <View style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', padding: 24, borderRadius: 18 }}>
                 <View style={{ width: '100%', alignItems: 'flex-start', marginBottom: -18 }}>
-                  <Text style={{ color: '#FFD600', fontWeight: '400', fontSize: 20, textAlign: 'left', letterSpacing: 0.8 }}>Izaberi sport</Text>
+                  <Text style={{ color: '#fff', fontWeight: '400', fontSize: 20, textAlign: 'left', letterSpacing: 0.8, marginLeft: 20 }}>{t.selectYourSport}</Text>
                 </View>
                 <SportSelectionGrid
                   sports={ALL_SPORTS}
+                  language={language}
+                  userSports={userSports}
+                  t={t}
                   onSelect={sport => {
                     setShowFirstTimeSportModal(false);
                     setTimeout(() => {
@@ -1187,12 +1279,12 @@ const StartScreen = () => {
           onRequestClose={() => setShowRankList(false)}
         >
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.7)' }}>
-            <View style={{ width: 370, height: 600, borderRadius: 18, overflow: 'hidden', alignItems: 'stretch', justifyContent: 'flex-start', backgroundColor: isDarkMode ? '#2a3441' : '#fff', position: 'relative' }}>
+            <View style={{ width: 370, height: 600, borderRadius: 18, overflow: 'hidden', alignItems: 'stretch', justifyContent: 'flex-start', backgroundColor: '#2a3441', position: 'relative' }}>
               <View style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', padding: 24, borderRadius: 18 }}>
                 <TouchableOpacity onPress={() => setShowRankList(false)} style={{ position: 'absolute', top: 12, right: 12, zIndex: 2 }}>
                   <Ionicons name="close" size={28} color="#FFFF00" />
                 </TouchableOpacity>
-                <Text style={{ color: '#FFFF00', fontWeight: '300', fontSize: 24, marginBottom: 10 }}>Rang lista</Text>
+                <Text style={{ color: '#FFFF00', fontWeight: '300', fontSize: 24, marginBottom: 10 }}>{t.rankListTitle}</Text>
                {/* Sport selection tabs */}
                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12, marginLeft: 0, width: '100%', overflow: 'hidden' }}>
                  {/* Match Mecevi/Poruka style: transparent bg, yellow top border for active, bold yellow text for active, white for inactive, rounded corners */}
@@ -1211,7 +1303,7 @@ const StartScreen = () => {
                      }}
                    >
                      <Text style={{
-                       color: rankSport === s.key ? '#FFFF00' : (isDarkMode ? '#fff' : '#000'),
+                       color: rankSport === s.key ? '#FFFF00' : '#fff',
                        fontWeight: '300',
                        fontSize: 15,
                      }}>
@@ -1240,7 +1332,7 @@ const StartScreen = () => {
                      }}>
                        <Text style={{ width: 28, color: '#FFFF00', fontWeight: '300', fontSize: 16 }}>{index + 1}.</Text>
                        <View style={{ flex: 1 }}>
-                         <Text style={{ color: isDarkMode ? '#fff' : '#000', fontWeight: '300', fontSize: 15 }} numberOfLines={1} ellipsizeMode="tail">
+                         <Text style={{ color: '#fff', fontWeight: '300', fontSize: 15 }} numberOfLines={1} ellipsizeMode="tail">
                            {item.profile?.name || '-'} {item.profile?.surname || ''}
                          </Text>
                          <Text style={{ color: '#FFFF00', fontSize: 13, fontWeight: '300' }} numberOfLines={1} ellipsizeMode="tail">
@@ -1254,14 +1346,14 @@ const StartScreen = () => {
                        <Text style={{ color: '#FFFF00', fontWeight: '300', fontSize: 16, marginLeft: 4 }}>{item.rank}</Text>
                      </View>
                    )}
-                   ListEmptyComponent={<Text style={{ color: isDarkMode ? '#fff' : '#000', textAlign: 'center', marginTop: 24, fontWeight: '300' }}>Nema podataka za ovaj sport.</Text>}
+                   ListEmptyComponent={<Text style={{ color: '#fff', textAlign: 'center', marginTop: 24, fontWeight: '300' }}>{t.noDataForSport}</Text>}
                  />
                )}
                {/* User's own rank at the bottom */}
                {userRank && userProfile && (
                  <View style={{ marginTop: 10, alignItems: 'center' }}>
-                   <Text style={{ color: '#FFFF00', fontWeight: '300', fontSize: 16 }}>Vaš rang: #{userRank}</Text>
-                   <Text style={{ color: isDarkMode ? '#fff' : '#000', fontSize: 15, fontWeight: '300' }}>{userProfile.name || '-'} {userProfile.surname || ''} <Text style={{ color: '#FFFF00', fontSize: 13, fontWeight: '300' }}>@{userProfile.username || '-'}</Text></Text>
+                   <Text style={{ color: '#FFFF00', fontWeight: '300', fontSize: 16 }}>{t.yourRank}{userRank}</Text>
+                   <Text style={{ color: '#fff', fontSize: 15, fontWeight: '300' }}>{userProfile.name || '-'} {userProfile.surname || ''} <Text style={{ color: '#FFFF00', fontSize: 13, fontWeight: '300' }}>@{userProfile.username || '-'}</Text></Text>
                  </View>
                )}
               </View>
@@ -1277,12 +1369,12 @@ const StartScreen = () => {
           onRequestClose={() => setShowMatchHistory(false)}
         >
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.7)' }}>
-            <View style={{ width: 370, height: 600, borderRadius: 18, overflow: 'hidden', alignItems: 'stretch', justifyContent: 'flex-start', backgroundColor: isDarkMode ? '#2a3441' : '#fff', position: 'relative' }}>
+            <View style={{ width: 370, height: 600, borderRadius: 18, overflow: 'hidden', alignItems: 'stretch', justifyContent: 'flex-start', backgroundColor: '#2a3441', position: 'relative' }}>
               <View style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', padding: 24, borderRadius: 18 }}>
                 <TouchableOpacity onPress={() => setShowMatchHistory(false)} style={{ position: 'absolute', top: 12, right: 12, zIndex: 2 }}>
                   <Ionicons name="close" size={28} color="#FFFF00" />
                 </TouchableOpacity>
-                <Text style={{ color: '#FFFF00', fontWeight: '300', fontSize: 24, marginBottom: 18, textAlign: 'center' }}>Istorija meceva</Text>
+                <Text style={{ color: '#FFFF00', fontWeight: '300', fontSize: 24, marginBottom: 18, textAlign: 'center' }}>{t.matchHistoryTitle}</Text>
                 {/* Sport selection tabs for match history */}
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12, width: '100%' }}>
                   {ALL_SPORTS.map(s => (
@@ -1300,7 +1392,7 @@ const StartScreen = () => {
                       }}
                     >
                       <Text style={{
-                        color: selectedHistorySport === s.key ? '#FFFF00' : (isDarkMode ? '#fff' : '#000'),
+                        color: selectedHistorySport === s.key ? '#FFFF00' : '#fff',
                         fontWeight: '300',
                         fontSize: 15,
                       }}>
@@ -1312,7 +1404,7 @@ const StartScreen = () => {
                 {matchHistoryLoading ? (
                   <ActivityIndicator color="#FFFF00" style={{ marginTop: 20 }} />
                 ) : uniqueMatchHistory.length === 0 ? (
-                  <Text style={{ color: '#FFFF00', fontWeight: '300', fontSize: 18, textAlign: 'center', marginTop: 8 }}>Nemate odigranih meceva.</Text>
+                  <Text style={{ color: '#FFFF00', fontWeight: '300', fontSize: 18, textAlign: 'center', marginTop: 8 }}>{t.noMatchHistory}</Text>
                 ) : (
                   <FlatList
                     data={uniqueMatchHistory}
@@ -1332,7 +1424,7 @@ const StartScreen = () => {
                           return (
                             <View key={item.id} style={{ backgroundColor: '#232c3b', borderRadius: 10, padding: 12, marginBottom: 12 }}>
                               <Text style={{ color: '#FFFF00', fontWeight: '300', fontSize: 16 }}>Padel</Text>
-                              <Text style={{ color: isDarkMode ? '#fff' : '#000', fontSize: 15, marginBottom: 2, fontWeight: '300' }}>
+                              <Text style={{ color: '#fff', fontSize: 15, marginBottom: 2, fontWeight: '300' }}>
                                 Protiv: {uniqueOpponents.map(u => `${u.name} ${u.surname} @${u.username}`).join(' & ')}
                               </Text>
                               <Text style={{ color: item.result === 'win' ? '#00e676' : '#ff5252', fontWeight: '300' }}>
@@ -1375,7 +1467,7 @@ const StartScreen = () => {
                       ) : (
                         <View key={item.id} style={{ backgroundColor: '#232c3b', borderRadius: 10, padding: 12, marginBottom: 12 }}>
                                                      <Text style={{ color: '#FFFF00', fontWeight: '300', fontSize: 16 }}>{item.sport?.charAt(0).toUpperCase() + item.sport?.slice(1)}</Text>
-                          <Text style={{ color: isDarkMode ? '#fff' : '#000', fontSize: 15, marginBottom: 2, fontWeight: '300' }}>
+                          <Text style={{ color: '#fff', fontSize: 15, marginBottom: 2, fontWeight: '300' }}>
                             Protiv: {item.opponent_name || ''} {item.opponent_surname || ''} @{item.opponent_username || ''}
                           </Text>
                           <Text style={{ color: item.result === 'win' ? '#00e676' : '#ff5252', fontWeight: '300' }}>

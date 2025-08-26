@@ -37,14 +37,14 @@ const getProfileTranslations = (language) => {
     serbian: {
       profile: 'Profil',
       editProfile: 'Izmeni profil',
-      cancel: 'Otkaži',
-      save: 'Sačuvaj',
+      cancel: 'Otkazi',
+      save: 'Sacuvaj',
       statistics: 'Statistics',
-      achievements: 'Dostignuća',
+      achievements: 'Dostignuca',
       selectSport: 'Choose sport',
       padel: 'Padel',
       football: 'Fudbal',
-      basketball: 'Košarka',
+      basketball: 'Kosarka',
       tennis: 'Tenis',
       matchesPlayed: 'Meceva odigrano',
       wins: 'Pobeda',
@@ -369,7 +369,7 @@ const ProfileScreen = (props) => {
       sport: selectedSport,
     });
     if (error) setMessage('Greška: ' + error.message);
-    else setMessage('Uspešno sačuvano!');
+    else setMessage('Uspešno sacuvano!');
     setEdit(false);
     setLoading(false);
   };
@@ -380,12 +380,12 @@ const ProfileScreen = (props) => {
     // Find user by username
     const { data: users } = await supabase.from('profiles').select('id, expo_push_token').eq('username', friendUsername);
     if (!users || users.length === 0) {
-      setFriendMessage('Korisnik nije pronađen.');
+      setFriendMessage('Korisnik nije pronadjen.');
       return;
     }
     const user = (await supabase.auth.getUser()).data.user;
     if (users[0].id === user.id) {
-      setFriendMessage('Ne možete dodati sebe.');
+      setFriendMessage('Ne mozete dodati sebe.');
       return;
     }
     const res = await sendFriendRequest(user.id, users[0].id);
@@ -422,7 +422,7 @@ const ProfileScreen = (props) => {
       }
       const asset = pickerResult.assets && pickerResult.assets[0];
       if (!asset || !asset.uri) {
-        setAvatarError('Nije pronađena putanja do slike (uri).');
+        setAvatarError('Nije pronadjena putanja do slike (uri).');
         setAvatarUploading(false);
         console.log('No image URI found in picker result:', pickerResult);
         return;

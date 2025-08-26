@@ -17,7 +17,7 @@ export const supabase = createClient(url, key);
 // Friend management helpers
 export async function sendFriendRequest(fromUserId, toUserId) {
   if (fromUserId === toUserId) {
-    return { error: { message: 'Ne možete dodati sebe za prijatelja.' } };
+    return { error: { message: 'Ne mozete dodati sebe za prijatelja.' } };
   }
   // Check for existing request
   const { data: existing, error: checkError } = await supabase
@@ -27,7 +27,7 @@ export async function sendFriendRequest(fromUserId, toUserId) {
     .eq('to_user', toUserId)
     .maybeSingle();
   if (existing) {
-    return { error: { message: 'Zahtev već postoji.' } };
+    return { error: { message: 'Zahtev vec postoji.' } };
   }
   return supabase.from('friend_requests').insert({ from_user: fromUserId, to_user: toUserId });
 }
@@ -38,33 +38,27 @@ export async function getFriendRequests(userId) {
 }
 
 export async function acceptFriendRequest(requestId) {
-  console.log('Fetching request with id:', requestId);
   const { data: request, error } = await supabase.from('friend_requests').select('*').eq('id', requestId).single();
   if (error || !request) {
-    console.error('Error fetching request:', error);
     return { error };
   }
-  console.log('Fetched request:', request);
 
   const { error: friendError } = await supabase.from('friends').insert({ from_user: request.from_user, to_user: request.to_user });
   if (friendError) {
-    console.error('Error inserting friend:', friendError);
     return { error: friendError };
   }
-  console.log('Inserted into friends');
 
   const { error: deleteError } = await supabase.from('friend_requests').delete().eq('id', requestId);
   if (deleteError) {
-    console.error('Error deleting request:', deleteError);
     return { error: deleteError };
   }
-  console.log('Deleted friend request');
   return { error: null };
 }
 
 export async function getFriends(userId) {
   // Get all friends for userId
-  return supabase.from('friends').select('*').or(`from_user.eq.${userId},to_user.eq.${userId}`);
+  const result = await supabase.from('friends').select('*').or(`from_user.eq.${userId},to_user.eq.${userId}`);
+  return result;
 }
 
 export async function removeFriend(userId1, userId2) {
@@ -81,7 +75,6 @@ export async function getFriendshipStatus(userId1, userId2) {
       `and(from_user.eq.${userId1},to_user.eq.${userId2}),and(from_user.eq.${userId2},to_user.eq.${userId1})`
     );
   if (friendsError) {
-    console.error('Error fetching friendship status:', friendsError);
     return null;
   }
   if (friends && friends.length > 0) {
@@ -95,7 +88,6 @@ export async function getFriendshipStatus(userId1, userId2) {
       `and(from_user.eq.${userId1},to_user.eq.${userId2}),and(from_user.eq.${userId2},to_user.eq.${userId1})`
     );
   if (reqError) {
-    console.error('Error fetching friend requests:', reqError);
     return null;
   }
   for (const row of requests || []) {
@@ -186,7 +178,6 @@ export async function getUserStats(userId, sport) {
   }
   const { data: matchHistory, error } = await query;
   if (error) {
-    console.error('Error fetching match history:', error);
     return { matchesPlayed: 0, wins: 0, winrate: 0, bestSport: '-', rank: 0 };
   }
   const matchesPlayed = matchHistory.length;
@@ -254,8 +245,6 @@ export async function declineFriendRequest(requestId) {
 }
 
 export async function cancelFriendRequest(fromUserId, toUserId) {
-  console.log('cancelFriendRequest called with:', { fromUserId, toUserId });
-  // Try using .filter instead of .eq
   let request, fetchError;
   try {
     const res = await supabase
@@ -266,23 +255,18 @@ export async function cancelFriendRequest(fromUserId, toUserId) {
       .maybeSingle();
     request = res.data;
     fetchError = res.error;
-    console.log('Result from .filter:', res);
   } catch (e) {
     fetchError = e;
     request = null;
-    console.error('Exception in .filter fetch:', e);
   }
   if (fetchError) {
-    console.error('Error fetching friend request to cancel:', fetchError);
     return { error: fetchError };
   }
   if (!request) {
     // As a last resort, fetch all and filter in JS
     const allRes = await supabase.from('friend_requests').select('*');
-    console.log('All friend_requests:', allRes.data);
     const found = (allRes.data || []).find(r => r.from_user === fromUserId && r.to_user === toUserId);
     if (!found) {
-      console.warn('No friend request found to cancel for:', { fromUserId, toUserId });
       return { error: 'No request found' };
     }
     // Delete by id
@@ -299,7 +283,6 @@ export async function getSportLeaderboard(sport) {
     .eq('sport', sport)
     .order('rank', { ascending: false });
   if (error) {
-    console.error('Error fetching leaderboard:', error);
     return [];
   }
   return data || [];
@@ -327,7 +310,6 @@ export async function awardAchievementPoints(userId, sport, achievementKey, poin
   }, { upsert: false });
   // If unique violation, ignore
   if (error && !error.message.includes('duplicate key')) {
-    console.error('Error awarding achievement points:', error);
   }
 }
 

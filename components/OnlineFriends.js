@@ -5,7 +5,7 @@ import { Dimensions, Image, Modal, ScrollView, Text, TouchableOpacity, View } fr
 import { cappedFontSize, scale, verticalScale } from '../constants/Responsive';
 import AnimatedBackground from './AnimatedBackground';
 
-const STATUS_SIZE = scale(6);
+const STATUS_SIZE = scale(12);
 
 function isFriendOnline(profile) {
   if (!profile || !profile.last_active) return false;
@@ -63,22 +63,22 @@ const OnlineFriends = ({ friends, allFriends, isDarkMode = true, t }) => {
               key={f.profile.avatar_url}
               source={{ uri: f.profile.avatar_url }}
               style={{
-                width: scale(14),
-                height: scale(14),
-                borderRadius: scale(7),
+                width: scale(28),
+                height: scale(28),
+                borderRadius: scale(14),
                 resizeMode: 'cover',
               }}
             />
           ) : (
             <View style={{
-              width: scale(14),
-              height: scale(14),
-              borderRadius: scale(7),
+              width: scale(28),
+              height: scale(28),
+              borderRadius: scale(14),
               backgroundColor: '#FFFF00',
               justifyContent: 'center',
               alignItems: 'center',
             }}>
-              <Text style={{ color: '#181818', fontWeight: '600', fontSize: scale(9) }}>
+              <Text style={{ color: '#181818', fontWeight: '600', fontSize: scale(18) }}>
                 {f.profile?.name?.[0]?.toUpperCase() || f.profile?.username?.[0]?.toUpperCase() || '?'}
               </Text>
             </View>
@@ -86,13 +86,13 @@ const OnlineFriends = ({ friends, allFriends, isDarkMode = true, t }) => {
           {/* Online status indicator */}
           <View style={{
             position: 'absolute',
-            bottom: -1,
-            right: -1,
+            bottom: -2,
+            right: -2,
             width: STATUS_SIZE,
             height: STATUS_SIZE,
             borderRadius: STATUS_SIZE / 2,
             backgroundColor: online ? '#4caf50' : '#888',
-            borderWidth: 1,
+            borderWidth: 2,
             borderColor: isDarkMode ? '#2a3441' : '#fff',
           }} />
         </View>
@@ -125,22 +125,22 @@ const OnlineFriends = ({ friends, allFriends, isDarkMode = true, t }) => {
               key={f.profile.avatar_url}
               source={{ uri: f.profile.avatar_url }}
               style={{
-                width: scale(14),
-                height: scale(14),
-                borderRadius: scale(7),
+                width: scale(28),
+                height: scale(28),
+                borderRadius: scale(14),
                 resizeMode: 'cover',
               }}
             />
           ) : (
             <View style={{
-              width: scale(14),
-              height: scale(14),
-              borderRadius: scale(7),
+              width: scale(28),
+              height: scale(28),
+              borderRadius: scale(14),
               backgroundColor: '#FFFF00',
               justifyContent: 'center',
               alignItems: 'center',
             }}>
-              <Text style={{ color: '#181818', fontWeight: '600', fontSize: scale(9) }}>
+              <Text style={{ color: '#181818', fontWeight: '600', fontSize: scale(18) }}>
                 {f.profile?.name?.[0]?.toUpperCase() || f.profile?.username?.[0]?.toUpperCase() || '?'}
               </Text>
             </View>
@@ -148,13 +148,13 @@ const OnlineFriends = ({ friends, allFriends, isDarkMode = true, t }) => {
           {/* Online status indicator */}
           <View style={{
             position: 'absolute',
-            bottom: -1,
-            right: -1,
+            bottom: -2,
+            right: -2,
             width: STATUS_SIZE,
             height: STATUS_SIZE,
             borderRadius: STATUS_SIZE / 2,
             backgroundColor: online ? '#4caf50' : '#888',
-            borderWidth: 1,
+            borderWidth: 2,
             borderColor: isDarkMode ? '#2a3441' : '#fff',
           }} />
         </View>

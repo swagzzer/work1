@@ -1,4 +1,5 @@
 import { MaterialIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
 import { FlatList, Keyboard, KeyboardAvoidingView, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -6,7 +7,6 @@ import { useProfileRefresh } from '../../app/context/ProfileRefreshContext';
 import AnimatedBackground from '../../components/AnimatedBackground';
 import PaymentScreen from '../../components/PaymentScreen';
 import { createChat, createPayment, sendPushNotification, supabase } from '../../services/supabaseClient';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SPORTS = [
   { key: 'padel', label: 'Padel' },
@@ -38,7 +38,7 @@ const getSportLabel = (sportKey, language) => {
 const getMatchesTranslations = (language) => {
   const translations = {
     serbian: {
-      newMatch: 'Novi meč (V2)',
+      newMatch: 'Novi mec (V2)',
       sport: 'Sport',
       name: 'Naziv',
       location: 'Lokacija',
@@ -53,17 +53,17 @@ const getMatchesTranslations = (language) => {
       timeFormatError: 'Vreme mora biti u formatu HH:mm!',
       error: 'Greska: ',
       create: 'Kreiraj',
-      cancel: 'Otkaži',
+      cancel: 'Otkazi',
       matches: 'Mecevi',
       noMatches: 'Nema meceva',
-      join: 'Pridruži se',
-      cancelJoin: 'Otkaži prijavu',
+      join: 'Pridruzi se',
+      cancelJoin: 'Otkazi prijavu',
       full: 'Popunjeno',
-      sendResult: 'Pošalji rezultat',
+      sendResult: 'Posalji rezultat',
       resultSent: 'Rezultat poslat',
       send: 'Posalji',
       cancel: 'Otkazi',
-      save: 'Sačuvaj',
+      save: 'Sacuvaj',
       selectTeam: 'Izaberi tim',
       joinTeam: 'Pridruzi se timu',
       team1: 'Tim 1',
@@ -418,12 +418,12 @@ const MatchesScreen = () => {
     }
     const paymentRes = await createPayment(user.id, match.id, match.price, 'success');
     if (paymentRes.error) {
-      setMessage('Greška pri plaćanju: ' + paymentRes.error.message);
+      setMessage('Greška pri placanju: ' + paymentRes.error.message);
       return;
     }
     const { data: creator } = await supabase.from('profiles').select('expo_push_token, username').eq('id', match.creator).single();
     if (creator?.expo_push_token) {
-      await sendPushNotification(creator.expo_push_token, 'Novi igrač', `Korisnik ${user.email} se prijavio na vaš meč: ${match.name}`);
+      await sendPushNotification(creator.expo_push_token, 'Novi igrac', `Korisnik ${user.email} se prijavio na vas mec: ${match.name}`);
     }
     setMessage('Uspešno ste se prijavili i platili!');
   };
@@ -780,7 +780,7 @@ const MatchesScreen = () => {
                           setScoreModalVisible(true);
                         }}
                       >
-                        <Text style={{ color: '#181818', fontWeight: '400', fontSize: 14, letterSpacing: 0.5 }}>Pošalji rezultat</Text>
+                        <Text style={{ color: '#181818', fontWeight: '400', fontSize: 14, letterSpacing: 0.5 }}>Posalji rezultat</Text>
                       </TouchableOpacity>
                     )}
                     {/* After submission, show a message */}
@@ -1317,7 +1317,7 @@ const MatchesScreen = () => {
                           }
                         }}
                       >
-                        <Text style={{ color: '#181818', fontWeight: '400', fontSize: 14, letterSpacing: 0.5 }}>Sačuvaj</Text>
+                        <Text style={{ color: '#181818', fontWeight: '400', fontSize: 14, letterSpacing: 0.5 }}>Sacuvaj</Text>
                       </TouchableOpacity>
                     </View>
                   </>

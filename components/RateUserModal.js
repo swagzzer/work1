@@ -84,7 +84,7 @@ const RateUserModal = ({ visible, onClose, user, onSubmit }) => {
                   disabled={rating === 0 || submitting}
                   style={{ backgroundColor: '#FFFF00', borderRadius: scale(8), paddingVertical: scale(10), paddingHorizontal: scale(24), marginTop: 4, opacity: rating && !submitting ? 1 : 0.6 }}
                 >
-                  <Text style={{ color: '#181818', fontWeight: '400', fontSize: 14, letterSpacing: 0.5 }}>Pošalji ocenu</Text>
+                  <Text style={{ color: '#181818', fontWeight: '400', fontSize: 14, letterSpacing: 0.5 }}>Posalji ocenu</Text>
                 </TouchableOpacity>
               </>
             )}

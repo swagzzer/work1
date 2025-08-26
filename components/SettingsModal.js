@@ -4,8 +4,8 @@ import { Alert, Animated, Dimensions, Modal, ScrollView, Text, TextInput, Toucha
 import { createSupportRequest, sendSupportEmail, supabase } from '../services/supabaseClient';
 
 const { width, height } = Dimensions.get('window');
-const modalWidth = width * 0.85;
-const modalHeight = height * 0.85;
+const modalWidth = width;
+const modalHeight = height;
 
 const SettingsModal = ({ visible, onClose, profile, onProfileUpdate, language = 'serbian', isDarkMode = true }) => {
   const [currentPage, setCurrentPage] = useState('main');
@@ -200,10 +200,10 @@ const SettingsModal = ({ visible, onClose, profile, onProfileUpdate, language = 
       // Clear the form
       setContactSupport({ subject: '', message: '' });
       
-      Alert.alert(
-        language === 'english' ? 'Success' : 'Uspešno', 
-        language === 'english' ? 'Support request sent successfully. We will get back to you soon!' : 'Zahtev za podršku je uspešno poslat. Odgovorićemo vam uskoro!'
-      );
+              Alert.alert(
+          language === 'english' ? 'Success' : 'Uspešno', 
+          language === 'english' ? 'Support request sent successfully. We will get back to you soon!' : 'Zahtev za podrsku je uspešno poslat. Odgovoricemo vam uskoro!'
+        );
       setCurrentPage('main');
     } catch (error) {
       Alert.alert('Error', error.message);
@@ -212,10 +212,10 @@ const SettingsModal = ({ visible, onClose, profile, onProfileUpdate, language = 
 
   const renderMainPage = () => (
     <Animated.View style={{ flex: 1 }}>
-      <View style={{ padding: 24 }}>
+      <View style={{ padding: 24, paddingTop: 60 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <Text style={{ color: isDarkMode ? '#fff' : '#000', fontWeight: '600', fontSize: 24, letterSpacing: 0.8 }}>
-            {language === 'english' ? 'Settings' : 'Podešavanja'}
+            {language === 'english' ? 'Settings' : 'Podesavanja'}
           </Text>
           <TouchableOpacity onPress={onClose}>
             <Ionicons name="close" size={28} color={isDarkMode ? '#fff' : '#000'} />
@@ -279,7 +279,7 @@ const SettingsModal = ({ visible, onClose, profile, onProfileUpdate, language = 
           {/* Support Section */}
           <View style={{ marginBottom: 32 }}>
             <Text style={{ color: isDarkMode ? '#fff' : '#000', fontSize: 18, fontWeight: '600', marginBottom: 16 }}>
-              {language === 'english' ? 'Support' : 'Podrška'}
+              {language === 'english' ? 'Support' : 'Podrska'}
             </Text>
             
             <TouchableOpacity 
@@ -289,7 +289,7 @@ const SettingsModal = ({ visible, onClose, profile, onProfileUpdate, language = 
               <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
                 <MaterialIcons name="support-agent" size={20} color="#FFFF00" style={{ marginRight: 12 }} />
                 <Text style={styles.settingText}>
-                  {language === 'english' ? 'Contact support' : 'Kontaktirajte podršku'}
+                  {language === 'english' ? 'Contact support' : 'Kontaktirajte podrsku'}
                 </Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color={isDarkMode ? '#fff' : '#000'} />
@@ -302,7 +302,7 @@ const SettingsModal = ({ visible, onClose, profile, onProfileUpdate, language = 
 
   const renderAccountPage = () => (
     <Animated.View style={{ flex: 1 }}>
-      <View style={{ padding: 24 }}>
+      <View style={{ padding: 24, paddingTop: 60 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <TouchableOpacity onPress={() => setCurrentPage('main')}>
             <Ionicons name="arrow-back" size={24} color={isDarkMode ? '#fff' : '#000'} />
@@ -319,7 +319,7 @@ const SettingsModal = ({ visible, onClose, profile, onProfileUpdate, language = 
             style={styles.textInput}
             value={accountDetails.name}
             onChangeText={(text) => setAccountDetails({...accountDetails, name: text})}
-            placeholder={language === 'english' ? 'Enter your name' : 'Unesite vaše ime'}
+            placeholder={language === 'english' ? 'Enter your name' : 'Unesite vase ime'}
             placeholderTextColor={isDarkMode ? '#b0b8c1' : '#666'}
           />
 
@@ -328,16 +328,16 @@ const SettingsModal = ({ visible, onClose, profile, onProfileUpdate, language = 
             style={styles.textInput}
             value={accountDetails.surname}
             onChangeText={(text) => setAccountDetails({...accountDetails, surname: text})}
-            placeholder={language === 'english' ? 'Enter your surname' : 'Unesite vaše prezime'}
+            placeholder={language === 'english' ? 'Enter your surname' : 'Unesite vase prezime'}
             placeholderTextColor={isDarkMode ? '#b0b8c1' : '#666'}
           />
 
-          <Text style={styles.inputLabel}>{language === 'english' ? 'Username' : 'Korisničko ime'}</Text>
+                      <Text style={styles.inputLabel}>{language === 'english' ? 'Username' : 'Korisnicko ime'}</Text>
           <TextInput
             style={styles.textInput}
             value={accountDetails.username}
             onChangeText={(text) => setAccountDetails({...accountDetails, username: text})}
-            placeholder={language === 'english' ? 'Enter username' : 'Unesite korisničko ime'}
+            placeholder={language === 'english' ? 'Enter username' : 'Unesite korisnicko ime'}
             placeholderTextColor={isDarkMode ? '#b0b8c1' : '#666'}
           />
 
@@ -363,7 +363,7 @@ const SettingsModal = ({ visible, onClose, profile, onProfileUpdate, language = 
 
           <TouchableOpacity style={styles.saveButton} onPress={handleSaveAccountDetails}>
             <Text style={styles.saveButtonText}>
-              {language === 'english' ? 'Save Changes' : 'Sačuvaj izmene'}
+              {language === 'english' ? 'Save Changes' : 'Sacuvaj izmene'}
             </Text>
           </TouchableOpacity>
         </ScrollView>
@@ -373,7 +373,7 @@ const SettingsModal = ({ visible, onClose, profile, onProfileUpdate, language = 
 
   const renderPrivacyPage = () => (
     <Animated.View style={{ flex: 1 }}>
-      <View style={{ padding: 24 }}>
+      <View style={{ paddingTop: 60, padding: 24 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <TouchableOpacity onPress={() => setCurrentPage('main')}>
             <Ionicons name="arrow-back" size={24} color={isDarkMode ? '#fff' : '#000'} />
@@ -429,69 +429,11 @@ const SettingsModal = ({ visible, onClose, profile, onProfileUpdate, language = 
              </View>
            </View>
 
-          <View style={styles.privacyItem}>
-            <Text style={styles.privacyLabel}>
-              {language === 'english' ? 'Show Online Status' : 'Prikaži online status'}
-            </Text>
-            <TouchableOpacity 
-              style={[styles.toggleButton, privacySettings.showOnlineStatus && styles.toggleButtonActive]}
-              onPress={() => setPrivacySettings({
-                ...privacySettings,
-                showOnlineStatus: !privacySettings.showOnlineStatus
-              })}
-            >
-              <Text style={[styles.toggleText, privacySettings.showOnlineStatus && styles.toggleTextActive]}>
-                {privacySettings.showOnlineStatus 
-                  ? (language === 'english' ? 'On' : 'Uključeno')
-                  : (language === 'english' ? 'Off' : 'Isključeno')
-                }
-              </Text>
-            </TouchableOpacity>
-          </View>
 
-          <View style={styles.privacyItem}>
-            <Text style={styles.privacyLabel}>
-              {language === 'english' ? 'Allow Friend Requests' : 'Dozvoli zahteve za prijateljstvo'}
-            </Text>
-            <TouchableOpacity 
-              style={[styles.toggleButton, privacySettings.allowFriendRequests && styles.toggleButtonActive]}
-              onPress={() => setPrivacySettings({
-                ...privacySettings,
-                allowFriendRequests: !privacySettings.allowFriendRequests
-              })}
-            >
-              <Text style={[styles.toggleText, privacySettings.allowFriendRequests && styles.toggleTextActive]}>
-                {privacySettings.allowFriendRequests 
-                  ? (language === 'english' ? 'On' : 'Uključeno')
-                  : (language === 'english' ? 'Off' : 'Isključeno')
-                }
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.privacyItem}>
-            <Text style={styles.privacyLabel}>
-              {language === 'english' ? 'Show Match History' : 'Prikaži istoriju mečeva'}
-            </Text>
-            <TouchableOpacity 
-              style={[styles.toggleButton, privacySettings.showMatchHistory && styles.toggleButtonActive]}
-              onPress={() => setPrivacySettings({
-                ...privacySettings,
-                showMatchHistory: !privacySettings.showMatchHistory
-              })}
-            >
-              <Text style={[styles.toggleText, privacySettings.showMatchHistory && styles.toggleTextActive]}>
-                {privacySettings.showMatchHistory 
-                  ? (language === 'english' ? 'On' : 'Uključeno')
-                  : (language === 'english' ? 'Off' : 'Isključeno')
-                }
-              </Text>
-            </TouchableOpacity>
-          </View>
 
           <TouchableOpacity style={styles.saveButton} onPress={handleSavePrivacy}>
             <Text style={styles.saveButtonText}>
-              {language === 'english' ? 'Save Changes' : 'Sačuvaj izmene'}
+              {language === 'english' ? 'Save Changes' : 'Sacuvaj izmene'}
             </Text>
           </TouchableOpacity>
         </ScrollView>
@@ -501,7 +443,7 @@ const SettingsModal = ({ visible, onClose, profile, onProfileUpdate, language = 
 
   const renderLocationPage = () => (
     <Animated.View style={{ flex: 1 }}>
-      <View style={{ padding: 24 }}>
+      <View style={{ padding: 24, paddingTop: 60 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <TouchableOpacity onPress={() => setCurrentPage('main')}>
             <Ionicons name="arrow-back" size={24} color={isDarkMode ? '#fff' : '#000'} />
@@ -518,13 +460,13 @@ const SettingsModal = ({ visible, onClose, profile, onProfileUpdate, language = 
             style={styles.textInput}
             value={location}
             onChangeText={setLocation}
-            placeholder={language === 'english' ? 'Enter your city' : 'Unesite vaš grad'}
+            placeholder={language === 'english' ? 'Enter your city' : 'Unesite vas grad'}
             placeholderTextColor={isDarkMode ? '#b0b8c1' : '#666'}
           />
 
           <TouchableOpacity style={styles.saveButton} onPress={handleSaveLocation}>
             <Text style={styles.saveButtonText}>
-              {language === 'english' ? 'Save Location' : 'Sačuvaj lokaciju'}
+              {language === 'english' ? 'Save Location' : 'Sacuvaj lokaciju'}
             </Text>
           </TouchableOpacity>
         </ScrollView>
@@ -534,13 +476,13 @@ const SettingsModal = ({ visible, onClose, profile, onProfileUpdate, language = 
 
   const renderContactPage = () => (
     <Animated.View style={{ flex: 1 }}>
-      <View style={{ padding: 24 }}>
+      <View style={{ padding: 24, paddingTop: 60 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <TouchableOpacity onPress={() => setCurrentPage('main')}>
             <Ionicons name="arrow-back" size={24} color={isDarkMode ? '#fff' : '#000'} />
           </TouchableOpacity>
           <Text style={{ color: isDarkMode ? '#fff' : '#000', fontWeight: '600', fontSize: 20 }}>
-            {language === 'english' ? 'Contact Support' : 'Kontaktirajte podršku'}
+            {language === 'english' ? 'Contact Support' : 'Kontaktirajte podrsku'}
           </Text>
           <View style={{ width: 24 }} />
         </View>
@@ -560,14 +502,14 @@ const SettingsModal = ({ visible, onClose, profile, onProfileUpdate, language = 
             style={[styles.textInput, { height: 120, textAlignVertical: 'top' }]}
             value={contactSupport.message}
             onChangeText={(text) => setContactSupport({...contactSupport, message: text})}
-            placeholder={language === 'english' ? 'Enter your message' : 'Unesite vašu poruku'}
+            placeholder={language === 'english' ? 'Enter your message' : 'Unesite vasu poruku'}
             placeholderTextColor={isDarkMode ? '#b0b8c1' : '#666'}
             multiline
           />
 
           <TouchableOpacity style={styles.saveButton} onPress={handleContactSupport}>
             <Text style={styles.saveButtonText}>
-              {language === 'english' ? 'Send Message' : 'Pošalji poruku'}
+              {language === 'english' ? 'Send Message' : 'Posalji poruku'}
             </Text>
           </TouchableOpacity>
         </ScrollView>
@@ -604,12 +546,12 @@ const SettingsModal = ({ visible, onClose, profile, onProfileUpdate, language = 
 const styles = {
   modalBackdrop: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: 'flex-start',
+    alignItems: 'stretch',
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalView: {
-    borderRadius: 18,
+    borderRadius: 0,
     overflow: 'hidden',
     backgroundColor: '#232b3b',
   },
@@ -693,7 +635,7 @@ const styles = {
     backgroundColor: 'rgba(255,255,255,0.1)',
     borderRadius: 20,
     overflow: 'hidden',
-    minWidth: 120,
+    minWidth: 200,
   },
   dualToggleButton: {
     flex: 1,
