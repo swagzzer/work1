@@ -1,7 +1,7 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
-import { FlatList, Keyboard, KeyboardAvoidingView, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+import { FlatList, Image, Keyboard, KeyboardAvoidingView, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useProfileRefresh } from '../../app/context/ProfileRefreshContext';
 import AnimatedBackground from '../../components/AnimatedBackground';
@@ -124,6 +124,128 @@ const getMatchesTranslations = (language) => {
 };
 
 const ADMIN_UUID = '4359e435-4481-400f-87d7-e14a00f0a177';
+
+// Global image cache that persists across the entire app
+if (!global.HERO_IMAGE_CACHE) {
+  global.HERO_IMAGE_CACHE = {
+    padel: require('../../assets/images/hero-padel.jpg'),
+    fudbal: require('../../assets/images/hero-football.jpg'),
+    kosarka: require('../../assets/images/hero-basketball.jpg'),
+    tenis: require('../../assets/images/hero-tennis.jpg')
+  };
+  
+  // Force preload all images to ensure they're cached
+  Object.values(global.HERO_IMAGE_CACHE).forEach(img => {
+    if (img && typeof img === 'object') {
+      // Force React Native to load and cache the image
+      img.toString();
+    }
+  });
+  
+  console.log('Global HERO_IMAGE_CACHE initialized');
+}
+
+const HERO_IMAGE_CACHE = global.HERO_IMAGE_CACHE;
+
+// Individual sport image components that never re-render
+const PadelImage = React.memo(() => {
+  console.log('PadelImage component rendered');
+  return (
+    <Image
+      source={HERO_IMAGE_CACHE.padel}
+      style={styles.sportImage}
+      resizeMode="cover"
+      fadeDuration={0}
+      cachePolicy="memory"
+      loadingIndicatorSource={null}
+      progressiveRenderingEnabled={false}
+      onLoadStart={() => console.log('Padel image load start')}
+      onLoad={() => console.log('Padel image loaded')}
+      onError={(error) => console.log('Padel image error:', error)}
+    />
+  );
+});
+
+const FootballImage = React.memo(() => {
+  console.log('FootballImage component rendered');
+  return (
+    <Image
+      source={HERO_IMAGE_CACHE.fudbal}
+      style={styles.sportImage}
+      resizeMode="cover"
+      fadeDuration={0}
+      cachePolicy="memory"
+      loadingIndicatorSource={null}
+      progressiveRenderingEnabled={false}
+      onLoadStart={() => console.log('Football image load start')}
+      onLoad={() => console.log('Football image loaded')}
+      onError={(error) => console.log('Football image error:', error)}
+    />
+  );
+});
+
+const BasketballImage = React.memo(() => {
+  console.log('BasketballImage component rendered');
+  return (
+    <Image
+      source={HERO_IMAGE_CACHE.kosarka}
+      style={styles.sportImage}
+      resizeMode="cover"
+      fadeDuration={0}
+      cachePolicy="memory"
+      loadingIndicatorSource={null}
+      progressiveRenderingEnabled={false}
+      onLoadStart={() => console.log('Basketball image load start')}
+      onLoad={() => console.log('Basketball image loaded')}
+      onError={(error) => console.log('Basketball image error:', error)}
+    />
+  );
+});
+
+const TennisImage = React.memo(() => {
+  console.log('TennisImage component rendered');
+  return (
+    <Image
+      source={HERO_IMAGE_CACHE.tenis}
+      style={styles.sportImage}
+      resizeMode="cover"
+      fadeDuration={0}
+      cachePolicy="memory"
+      loadingIndicatorSource={null}
+      progressiveRenderingEnabled={false}
+      onLoadStart={() => console.log('Tennis image load start')}
+      onLoad={() => console.log('Tennis image loaded')}
+      onError={(error) => console.log('Tennis image error:', error)}
+    />
+  );
+});
+
+// Custom CachedImage component that prevents reloading
+const CachedImage = React.memo(({ sport, style, ...props }) => {
+  const imageSource = HERO_IMAGE_CACHE[sport] || HERO_IMAGE_CACHE.padel;
+  
+  // Add console log to see when images are being rendered
+  console.log(`Rendering CachedImage for sport: ${sport}`);
+  
+  return (
+    <Image
+      source={imageSource}
+      style={style}
+      resizeMode="cover"
+      fadeDuration={0}
+      cachePolicy="memory"
+      loadingIndicatorSource={null}
+      progressiveRenderingEnabled={false}
+      onLoadStart={() => console.log(`Image load start for ${sport}`)}
+      onLoad={() => console.log(`Image loaded for ${sport}`)}
+      onError={(error) => console.log(`Image error for ${sport}:`, error)}
+      {...props}
+    />
+  );
+}, (prevProps, nextProps) => {
+  // Custom comparison function - only re-render if sport actually changes
+  return prevProps.sport === nextProps.sport;
+});
 
 // New CreateMatchModalV2 component
 const CreateMatchModalV2 = ({ visible, onClose, selectedDate, modalSport, refreshMatches, t, language, isDarkMode }) => {
@@ -289,6 +411,7 @@ const MatchesScreen = () => {
   const [lastRefresh, setLastRefresh] = useState(null);
   const { setRefreshKey } = useProfileRefresh();
   const [showNewModal, setShowNewModal] = useState(false);
+  const [message, setMessage] = useState(null);
   
   const t = getMatchesTranslations(language);
 
@@ -383,6 +506,8 @@ const MatchesScreen = () => {
     return () => clearInterval(interval);
   }, []);
 
+
+
   const fetchParticipants = async (matchIds) => {
     if (!matchIds.length) return;
     const { data } = await supabase
@@ -410,6 +535,10 @@ const MatchesScreen = () => {
     setLoading(false);
   };
 
+
+
+
+
   const handlePayAndJoin = async (match) => {
     const user = (await supabase.auth.getUser()).data.user;
     if (!user) {
@@ -429,10 +558,40 @@ const MatchesScreen = () => {
   };
 
   const handleDeleteMatch = async (matchId) => {
-    setDeleting(true);
-    await supabase.from('matches').delete().eq('id', matchId);
-    setMatches(prev => prev.filter(m => m.id !== matchId));
-    setDeleting(false);
+    try {
+      setDeleting(true);
+      
+      // First, delete related match_participants
+      const { error: participantsError } = await supabase
+        .from('match_participants')
+        .delete()
+        .eq('match_id', matchId);
+      
+      if (participantsError) {
+        // Silently handle participant deletion errors
+      }
+      
+      // Then delete the match
+      const { error: matchError } = await supabase
+        .from('matches')
+        .delete()
+        .eq('id', matchId);
+      
+      if (matchError) {
+        setMessage('Greška pri brisanju meča: ' + matchError.message);
+        // Clear error message after 5 seconds
+        setTimeout(() => setMessage(null), 5000);
+      } else {
+        setMatches(prev => prev.filter(m => m.id !== matchId));
+        setDeleteModalVisible(false);
+      }
+    } catch (error) {
+      setMessage('Greška pri brisanju meča: ' + error.message);
+      // Clear error message after 5 seconds
+      setTimeout(() => setMessage(null), 5000);
+    } finally {
+      setDeleting(false);
+    }
   };
 
   // Join match
@@ -519,7 +678,14 @@ const MatchesScreen = () => {
   const isPlayed = m => new Date(m.time) <= now;
   const isUserParticipant = m => Array.isArray(m.participants) && userId && m.participants.includes(userId);
 
-  let filteredMatches = matches.filter(m => m.sport === selectedSport);
+  // Instead of filtering out matches, we'll render all but hide non-matching ones
+  // This keeps Image components mounted and cached
+  const allMatches = matches;
+  
+  // Debug logging to see what's happening
+  console.log('Selected sport:', selectedSport);
+  console.log('Total matches:', allMatches.length);
+  console.log('All matches sports:', allMatches.map(m => m.sport));
 
   // Badge counts
   const terminiCount = matches.filter(isUpcoming).length;
@@ -530,7 +696,7 @@ const MatchesScreen = () => {
     <View style={styles.header}>
               <Text style={[styles.headerTitle, { color: '#FFFF00' }]} numberOfLines={1} ellipsizeMode="tail">{t.matches}</Text>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        {userEmail === 'veljko.milovic001@gmail.com' && (
+        {(userEmail === 'veljko.milovic001@gmail.com') && (
           <>
             <TouchableOpacity style={[styles.joinBtn, { backgroundColor: '#FFFF00', marginRight: 8, height: 40, minWidth: 40, justifyContent: 'center', alignItems: 'center' }]} onPress={() => setAdminModalVisible(true)}>
               <MaterialIcons name="admin-panel-settings" size={24} color="#181818" />
@@ -672,12 +838,26 @@ const MatchesScreen = () => {
       <AnimatedBackground isDarkMode={isDarkMode}>
         <View style={styles.container}>
           <FlatList
-            data={filteredMatches}
-            keyExtractor={item => item.id?.toString()}
+            data={allMatches}
+            keyExtractor={item => `${item.id}-${item.sport}`}
             ListHeaderComponent={
               <>
                 <ListHeader />
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12, width: '100%', paddingHorizontal: 16 }}>
+                {/* Message Display */}
+                {message && (
+                  <View style={[styles.message, { 
+                    color: message.includes('Greška') || message.includes('Error') ? '#e74c3c' : '#00b894',
+                    marginHorizontal: 16,
+                    marginBottom: 12,
+                    padding: 12,
+                    backgroundColor: 'rgba(0,0,0,0.1)',
+                    borderRadius: 8,
+                    textAlign: 'center'
+                  }]}>
+                    <Text style={{ color: 'inherit', textAlign: 'center' }}>{message}</Text>
+                  </View>
+                )}
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6, width: '100%', paddingHorizontal: 16 }}>
                   {SPORTS.map(s => (
                     <TouchableOpacity
                       key={s.key}
@@ -715,78 +895,106 @@ const MatchesScreen = () => {
                   userSubmission = (item.score_submissions || []).filter(s => s.user_id === userId);
                 } catch {}
                 const hasSubmitted = userSubmission.length > 0;
+                
+                // Only show matches for the selected sport, but keep them mounted
+                const shouldShow = item.sport === selectedSport;
+                
                 return (
-                  <View style={styles.matchCard}>
-                    {/* Name */}
-                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 2 }}>
-                      <Text style={[styles.matchName, { color: isDarkMode ? '#fff' : '#000' }]} numberOfLines={1} ellipsizeMode="tail">{item.name}</Text>
-                      <View style={{ marginLeft: 8, backgroundColor: '#FFFF00', borderRadius: 999, paddingHorizontal: 10, paddingVertical: 2, justifyContent: 'center', alignItems: 'center' }}>
-                        <Text style={{ color: '#232c3b', fontWeight: '400', fontSize: 12, letterSpacing: 0.5 }}>{item.level || 'Napredni'}</Text>
+                  <View style={[styles.matchCard, { display: shouldShow ? 'flex' : 'none' }]}>
+                    {/* Sport Image with Text Overlay */}
+                    <View style={styles.sportImageContainer}>
+                      {item.sport === 'padel' && <PadelImage />}
+                      {item.sport === 'fudbal' && <FootballImage />}
+                      {item.sport === 'kosarka' && <BasketballImage />}
+                      {item.sport === 'tenis' && <TennisImage />}
+                      {!['padel', 'fudbal', 'kosarka', 'tenis'].includes(item.sport) && <PadelImage />}
+                      {/* Text Overlay */}
+                      <View style={styles.textOverlay}>
+                        {/* Name */}
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+                          <Text style={[styles.matchName, { color: '#fff', textShadowColor: 'rgba(0,0,0,0.8)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 3 }]} numberOfLines={1} ellipsizeMode="tail">{item.name}</Text>
+                          <View style={{ marginLeft: 8, backgroundColor: '#2a3441', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 2, justifyContent: 'center', alignItems: 'center', borderWidth: 0.5, borderColor: '#FFFF00' }}>
+                            <Text style={{ color: '#FFFF00', fontWeight: '400', fontSize: 12, letterSpacing: 0.5 }}>{item.level || 'Napredni'}</Text>
+                          </View>
+                        </View>
+                        {/* Location */}
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+                          <MaterialIcons name="location-on" size={16} color="#fff" style={{ marginRight: 4, textShadowColor: 'rgba(0,0,0,0.8)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 2 }} />
+                          <Text style={[styles.matchLocation, { color: '#fff', textShadowColor: 'rgba(0,0,0,0.8)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 2 }]} numberOfLines={1} ellipsizeMode="tail">{item.location}</Text>
+                        </View>
+                        {/* Date */}
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+                          <MaterialIcons name="event" size={16} color="#fff" style={{ marginRight: 4, textShadowColor: 'rgba(0,0,0,0.8)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 2 }} />
+                          <Text style={[styles.matchDate, { color: '#fff', textShadowColor: 'rgba(0,0,0,0.8)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 2 }]} numberOfLines={1} ellipsizeMode="tail">
+                            {matchDate.toLocaleDateString([], { day: '2-digit', month: 'short' })}
+                          </Text>
+                        </View>
+                        {/* Time */}
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+                          <MaterialIcons name="access-time" size={16} color="#fff" style={{ marginRight: 4, textShadowColor: 'rgba(0,0,0,0.8)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 2 }} />
+                          <Text style={[styles.matchTime, { color: '#fff', textShadowColor: 'rgba(0,0,0,0.8)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 2 }]} numberOfLines={1} ellipsizeMode="tail">
+                            {matchDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </Text>
+                        </View>
+                        {/* Slots and Level only */}
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+                          <MaterialIcons name="people" size={16} color="#fff" style={{ marginRight: 4, textShadowColor: 'rgba(0,0,0,0.8)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 2 }} />
+                          <Text style={[styles.matchSlots, { color: '#fff', textShadowColor: 'rgba(0,0,0,0.8)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 2 }]} numberOfLines={1} ellipsizeMode="tail">{item.match_participants.length}/{item.slots}</Text>
+                        </View>
                       </View>
-                    </View>
-                    {/* Location */}
-                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 2 }}>
-                      <MaterialIcons name="location-on" size={16} color={isDarkMode ? "#b0b0b0" : "#666"} style={{ marginRight: 4 }} />
-                      <Text style={[styles.matchLocation, { color: isDarkMode ? '#b0b0b0' : '#666' }]} numberOfLines={1} ellipsizeMode="tail">{item.location}</Text>
-                    </View>
-                    {/* Date */}
-                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 2 }}>
-                      <MaterialIcons name="event" size={16} color={isDarkMode ? "#b0b0b0" : "#666"} style={{ marginRight: 4 }} />
-                      <Text style={[styles.matchDate, { color: isDarkMode ? '#b0b0b0' : '#666' }]} numberOfLines={1} ellipsizeMode="tail">
-                        {matchDate.toLocaleDateString([], { day: '2-digit', month: 'short' })}
-                      </Text>
-                    </View>
-                    {/* Time */}
-                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 2 }}>
-                      <MaterialIcons name="access-time" size={16} color={isDarkMode ? "#b0b0b0" : "#666"} style={{ marginRight: 4 }} />
-                      <Text style={[styles.matchTime, { color: isDarkMode ? '#b0b0b0' : '#666' }]} numberOfLines={1} ellipsizeMode="tail">
-                        {matchDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </Text>
-                    </View>
-                    {/* Slots, Level, Price in one row */}
-                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 2 }}>
-                      <MaterialIcons name="people" size={16} color={isDarkMode ? "#b0b0b0" : "#666"} style={{ marginRight: 4 }} />
-                      <Text style={[styles.matchSlots, { color: isDarkMode ? '#fff' : '#000' }]} numberOfLines={1} ellipsizeMode="tail">{item.match_participants.length}/{item.slots}</Text>
-                      <Text style={[styles.matchPrice, { color: isDarkMode ? '#fff' : '#000' }]} numberOfLines={1} ellipsizeMode="tail">{item.price} RSD</Text>
-                    </View>
-                    {/* Join/Cancel button */}
-                    {!isParticipant && !slotsFull && !matchStarted && (
-                      <TouchableOpacity style={styles.joinBtn} onPress={() => handleJoinClick(item)}>
-                        <Text style={styles.joinBtnText} numberOfLines={1} ellipsizeMode="tail">{t.join}</Text>
-                      </TouchableOpacity>
-                    )}
-                    {isParticipant && !matchStarted && (
-                      <TouchableOpacity style={[styles.joinBtn, { backgroundColor: '#FFFF00', marginTop: 8 }]} onPress={() => handleCancelJoin(item)}>
-                        <Text style={{ color: '#181818', fontWeight: '400', fontSize: 14, letterSpacing: 0.5 }}>{t.cancelJoin}</Text>
-                      </TouchableOpacity>
-                    )}
-                    {slotsFull && !isParticipant && !matchStarted && (
-                      <View style={[styles.joinBtn, { backgroundColor: '#ccc' }]}> 
-                        <Text style={{ color: '#888', fontWeight: '400', fontSize: 14, letterSpacing: 0.5 }}>Popunjeno</Text>
+                      
+                      {/* Price positioned higher up */}
+                      <View style={styles.priceContainer}>
+                        <Text style={[styles.matchPrice, { color: '#FFFF00', fontWeight: '400', fontSize: 12, letterSpacing: 0.5 }]} numberOfLines={1} ellipsizeMode="tail">{item.price} RSD</Text>
                       </View>
-                    )}
-                    {/* Submit Score Button (only if not submitted and match started) */}
-                    {matchStarted && isParticipant && !hasSubmitted && (
-                      <TouchableOpacity
-                        style={[styles.joinBtn, { backgroundColor: '#FFFF00', marginTop: 8 }]}
-                        onPress={() => {
-                          setScoreModalMatch(item);
-                          if (item.sport === 'tenis' || item.sport === 'padel') {
-                            setScoreInputs({ set1: ['', ''], set2: ['', ''], set3: ['', ''] });
-                          } else {
-                            setScoreInputs({ my: '', opp: '' });
-                          }
-                          setScoreError(null);
-                          setScoreModalVisible(true);
-                        }}
-                      >
-                        <Text style={{ color: '#181818', fontWeight: '400', fontSize: 14, letterSpacing: 0.5 }}>Posalji rezultat</Text>
-                      </TouchableOpacity>
-                    )}
-                    {/* After submission, show a message */}
-                    {matchStarted && isParticipant && hasSubmitted && (
-                      <Text style={{ color: '#FFFF00', marginTop: 8, fontWeight: '400', letterSpacing: 0.5 }}>Rezultat poslat</Text>
-                    )}
+                      
+                      {/* Join button positioned at bottom-right */}
+                      {!isParticipant && !slotsFull && !matchStarted && (
+                        <View style={styles.joinButtonContainer}>
+                          <TouchableOpacity style={[styles.joinBtn, { backgroundColor: 'transparent' }]} onPress={() => handleJoinClick(item)}>
+                            <Text style={{ color: '#FFFF00', fontWeight: '400', fontSize: 12, letterSpacing: 0.5 }} numberOfLines={1} ellipsizeMode="tail">{t.join}</Text>
+                          </TouchableOpacity>
+                        </View>
+                      )}
+                      {isParticipant && !matchStarted && (
+                        <View style={styles.joinButtonContainer}>
+                          <TouchableOpacity style={[styles.joinBtn, { backgroundColor: 'transparent' }]} onPress={() => handleCancelJoin(item)}>
+                            <Text style={{ color: '#FFFF00', fontWeight: '400', fontSize: 12, letterSpacing: 0.5 }}>{t.cancelJoin}</Text>
+                          </TouchableOpacity>
+                        </View>
+                      )}
+                      {slotsFull && !isParticipant && !matchStarted && (
+                        <View style={[styles.joinButtonContainer, { backgroundColor: 'rgba(0,0,0,0.7)' }]}> 
+                          <Text style={{ color: '#888', fontWeight: '400', fontSize: 14, letterSpacing: 0.5 }}>Popunjeno</Text>
+                        </View>
+                      )}
+                    </View>
+                    
+                    {/* Other buttons below image */}
+                    <View style={styles.buttonsContainer}>
+                      {/* Submit Score Button (only if not submitted and match started) */}
+                      {matchStarted && isParticipant && !hasSubmitted && (
+                        <TouchableOpacity
+                          style={[styles.joinBtn, { backgroundColor: '#FFFF00' }]}
+                          onPress={() => {
+                            setScoreModalMatch(item);
+                            if (item.sport === 'tenis' || item.sport === 'padel') {
+                              setScoreInputs({ set1: ['', ''], set2: ['', ''], set3: ['', ''] });
+                            } else {
+                              setScoreInputs({ my: '', opp: '' });
+                            }
+                            setScoreError(null);
+                            setScoreModalVisible(true);
+                          }}
+                        >
+                          <Text style={{ color: '#181818', fontWeight: '400', fontSize: 14, letterSpacing: 0.5 }}>Posalji rezultat</Text>
+                        </TouchableOpacity>
+                      )}
+                      {/* After submission, show a message */}
+                      {matchStarted && isParticipant && hasSubmitted && (
+                        <Text style={{ color: '#FFFF00', fontWeight: '400', letterSpacing: 0.5 }}>Rezultat poslat</Text>
+                      )}
+                    </View>
                   </View>
                 );
               }}
@@ -1482,11 +1690,10 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   matchCard: {
-    backgroundColor: '#181818',
-    borderRadius: 16,
+    backgroundColor: 'transparent',
     padding: 18,
     marginVertical: 10,
-    width: 340,
+    width: 380,
     alignSelf: 'center',
 
   },
@@ -1611,6 +1818,54 @@ const styles = StyleSheet.create({
     color: 'red',
     marginBottom: 10,
     textAlign: 'center',
+  },
+  sportImageContainer: {
+    position: 'relative',
+    width: '100%',
+    height: 150,
+    borderRadius: 10,
+    overflow: 'hidden',
+    marginBottom: 10,
+  },
+  sportImage: {
+    width: '100%',
+    height: '100%',
+  },
+  textOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    padding: 16,
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+  },
+  buttonsContainer: {
+    marginTop: 8,
+    alignItems: 'center',
+  },
+  priceContainer: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    backgroundColor: '#2a3441',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderWidth: 0.5,
+    borderColor: '#FFFF00',
+  },
+  joinButtonContainer: {
+    position: 'absolute',
+    bottom: 16,
+    right: 16,
+    backgroundColor: '#2a3441',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderWidth: 0.5,
+    borderColor: '#FFFF00',
   },
 });
 

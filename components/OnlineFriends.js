@@ -169,9 +169,81 @@ const OnlineFriends = ({ friends, allFriends, isDarkMode = true, t }) => {
   return (
     <>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: verticalScale(8) }}>
-        <Text style={{ color: '#FFFF00', fontWeight: '400', fontSize: cappedFontSize(17, 18), letterSpacing: 0.8 }}>{t.friends}</Text>
-        <TouchableOpacity onPress={() => setModalVisible(true)}>
-          <Text style={{ color: '#FFFF00', fontSize: cappedFontSize(15, 15) }}>{t.seeAll}</Text>
+        <Text style={{ 
+          color: '#FFFF00', 
+          fontWeight: '600', 
+          fontSize: cappedFontSize(17, 18), 
+          alignSelf: 'flex-start', 
+          marginLeft: 0, 
+          marginTop: verticalScale(8), 
+          marginBottom: verticalScale(8), 
+          letterSpacing: 0.8,
+          // Enhanced styling for eye-catching appearance
+          textShadowColor: 'rgba(0,0,0,0.8)',
+          textShadowOffset: { width: 2, height: 2 },
+          textShadowRadius: 4,
+          // Alternative: Add a subtle glow effect
+          // textShadowColor: '#FFFF00',
+          // textShadowOffset: { width: 0, height: 0 },
+          // textShadowRadius: 8,
+        }}>{t.friends}</Text>
+        <TouchableOpacity 
+          onPress={() => setModalVisible(true)}
+          style={{
+            // Option 1: Match "Igraj sada" button style (currently active)
+            backgroundColor: '#2a3441',
+            borderRadius: 8,
+            paddingVertical: 6,
+            paddingHorizontal: 12,
+            borderWidth: 0.5,
+            borderColor: '#FFFF00',
+            elevation: 2,
+            
+            // Option 2: Rounded pill style (uncomment to use)
+            // backgroundColor: '#2a3441',
+            // borderRadius: 20,
+            // paddingVertical: 8,
+            // paddingHorizontal: 16,
+            // borderWidth: 1,
+            // borderColor: '#FFFF00',
+            
+            // Option 3: Minimal outline style (uncomment to use)
+            // backgroundColor: 'transparent',
+            // borderRadius: 6,
+            // paddingVertical: 6,
+            // paddingHorizontal: 12,
+            // borderWidth: 1.5,
+            // borderColor: '#FFFF00',
+            
+            // Option 4: Filled button style (uncomment to use)
+            // backgroundColor: '#FFFF00',
+            // borderRadius: 8,
+            // paddingVertical: 8,
+            // paddingHorizontal: 16,
+            // borderWidth: 0,
+            
+            // Option 5: Card-like style (uncomment to use)
+            // backgroundColor: '#2a3441',
+            // borderRadius: 12,
+            // paddingVertical: 8,
+            // paddingHorizontal: 16,
+            // borderWidth: 0,
+            // shadowColor: '#000',
+            // shadowOffset: { width: 0, height: 2 },
+            // shadowOpacity: 0.1,
+            // shadowRadius: 4,
+            // elevation: 3,
+          }}
+        >
+          <Text style={{ 
+            color: '#FFFF00', 
+            fontSize: cappedFontSize(15, 15),
+            fontWeight: '500',
+            textAlign: 'center',
+            
+            // For Option 4 (filled button), change to:
+            // color: '#2a3441',
+          }}>{t.seeAll}</Text>
         </TouchableOpacity>
       </View>
       <View style={{ width: scale(340), marginBottom: verticalScale(18) }}>
@@ -181,7 +253,7 @@ const OnlineFriends = ({ friends, allFriends, isDarkMode = true, t }) => {
           </View>
         ) : (
           <View style={{ backgroundColor: isDarkMode ? '#2a3441' : '#F5F5F5', borderRadius: scale(18), padding: scale(28), alignItems: 'center', justifyContent: 'center' }}>
-            <Ionicons name="wifi" size={scale(44)} color="#FFFF00" style={{ marginBottom: verticalScale(10) }} />
+            <Ionicons name="people" size={scale(44)} color="#FFFF00" style={{ marginBottom: verticalScale(10) }} />
             <Text style={{ color: '#FFFF00', fontWeight: '300', fontSize: cappedFontSize(16, 17), marginBottom: verticalScale(4), letterSpacing: 0.8 }}>{t.noFriends}</Text>
             <Text style={{ color: isDarkMode ? '#fff' : '#000', fontWeight: '300', fontSize: cappedFontSize(15, 15), textAlign: 'center' }}>{t.inviteFriends}</Text>
           </View>

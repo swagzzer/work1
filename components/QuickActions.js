@@ -17,7 +17,24 @@ const QuickActions = ({
 }) => (
   <>
     <View style={{ width: CONTENT_WIDTH, alignSelf: 'center' }}>
-      <Text style={{ color: '#FFFF00', fontWeight: '400', fontSize: cappedFontSize(16, 17), alignSelf: 'center', marginTop: 8, marginBottom: 8, letterSpacing: 0.8 }}>{t.quickActions}</Text>
+      <Text style={{ 
+        color: '#FFFF00', 
+        fontWeight: '600', 
+        fontSize: cappedFontSize(17, 18), 
+        alignSelf: 'flex-start', 
+        marginLeft: 0, 
+        marginTop: 8, 
+        marginBottom: 8, 
+        letterSpacing: 0.8,
+        // Enhanced styling for eye-catching appearance
+        textShadowColor: 'rgba(0,0,0,0.8)',
+        textShadowOffset: { width: 2, height: 2 },
+        textShadowRadius: 4,
+        // Alternative: Add a subtle glow effect
+        // textShadowColor: '#FFFF00',
+        // textShadowOffset: { width: 0, height: 0 },
+        // textShadowRadius: 8,
+      }}>{t.quickActions}</Text>
     </View>
     <View style={{ width: CONTENT_WIDTH, alignSelf: 'center', flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginBottom: -56 }}>
       <TouchableOpacity style={{ backgroundColor: isDarkMode ? '#2a3441' : '#F5F5F5', borderRadius: 18, width: buttonWidth, height: 90, marginBottom: 16, padding: 16, alignItems: 'center', justifyContent: 'center', marginHorizontal: 6 }} onPress={onInviteFriends}>

@@ -5,7 +5,24 @@ import { cappedFontSize, CONTENT_WIDTH, scale, verticalScale } from '../constant
 const Statistics = ({ stats, onlineFriendsCount, isDarkMode = true, t }) => {
   return (
     <>
-      <Text style={{ color: '#FFFF00', fontWeight: '300', fontSize: cappedFontSize(18, 19), alignSelf: 'flex-start', marginLeft: 0, marginTop: verticalScale(8), marginBottom: verticalScale(8), letterSpacing: 0.8 }}>{t.statistics}</Text>
+      <Text style={{ 
+        color: '#FFFF00', 
+        fontWeight: '600', 
+        fontSize: cappedFontSize(17, 18), 
+        alignSelf: 'flex-start', 
+        marginLeft: 0, 
+        marginTop: verticalScale(8), 
+        marginBottom: verticalScale(8), 
+        letterSpacing: 0.8,
+        // Enhanced styling for eye-catching appearance
+        textShadowColor: 'rgba(0,0,0,0.8)',
+        textShadowOffset: { width: 2, height: 2 },
+        textShadowRadius: 4,
+        // Alternative: Add a subtle glow effect
+        // textShadowColor: '#FFFF00',
+        // textShadowOffset: { width: 0, height: 0 },
+        // textShadowRadius: 8,
+      }}>{t.statistics}</Text>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', width: CONTENT_WIDTH, marginBottom: 0 }}>
         <View style={{ backgroundColor: isDarkMode ? '#2a3441' : '#F5F5F5', borderRadius: scale(18), width: scale(165), height: verticalScale(90), marginBottom: verticalScale(16), padding: scale(16), justifyContent: 'center' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
