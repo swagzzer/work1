@@ -82,18 +82,18 @@ const TabsLayout = () => {
             iconName = focused ? 'person' : 'person-outline';
           }
 
-          return <Ionicons name={iconName} size={size} color={focused ? '#FFFF00' : '#fff'} />;
+          return <Ionicons name={iconName} size={size} color={focused ? '#00D4AA' : '#666'} />;
         },
         headerShown: false,
-        tabBarActiveTintColor: '#FFFF00',
-        tabBarInactiveTintColor: '#fff',
-        tabBarLabelStyle: { fontWeight: '300', fontSize: responsiveFontSize(12), letterSpacing: 0.5 },
+        tabBarActiveTintColor: '#00D4AA',
+        tabBarInactiveTintColor: '#666',
+        tabBarLabelStyle: { fontWeight: '600', fontSize: responsiveFontSize(12), letterSpacing: 0.5 },
         tabBarStyle: {
-          borderTopWidth: 2,
-          borderTopColor: '#FFFF00',
+          borderTopWidth: 1,
+          borderTopColor: '#E5E5E5',
         },
         tabBarBackground: () => (
-          <View style={{ flex: 1, backgroundColor: '#2a3441' }} />
+          <View style={{ flex: 1, backgroundColor: '#fff' }} />
         ),
       })}
     >

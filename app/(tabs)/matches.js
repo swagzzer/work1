@@ -1,7 +1,7 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
-import { FlatList, Image, Keyboard, KeyboardAvoidingView, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+import { FlatList, Image, Keyboard, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useProfileRefresh } from '../../app/context/ProfileRefreshContext';
 import AnimatedBackground from '../../components/AnimatedBackground';
@@ -308,62 +308,66 @@ const CreateMatchModalV2 = ({ visible, onClose, selectedDate, modalSport, refres
             style={{ width: '100%', alignItems: 'center', justifyContent: 'center', flex: 1 }}
           >
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-              <View style={{ backgroundColor: isDarkMode ? '#232c3b' : '#FFFFFF', borderRadius: 16, padding: 24, width: 340 }}>
-                <Text style={{ color: '#FFFF00', fontSize: 17, fontWeight: '400', marginBottom: 12, letterSpacing: 0.8 }}>{t.newMatch}</Text>
-                {/* Sport selection dropdown */}
-                <View style={{ marginBottom: 8 }}>
-                  <Text style={{ color: '#FFFF00', marginBottom: 4 }}>{t.sport}</Text>
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-                    {SPORTS.map(sport => (
-                      <TouchableOpacity
-                        key={sport.key}
-                        onPress={() => setForm(f => ({ ...f, sport: sport.key }))}
-                        style={{
-                          backgroundColor: form.sport === sport.key ? '#FFFF00' : (isDarkMode ? '#2a3441' : '#F5F5F5'),
-                          borderRadius: 8,
-                          paddingVertical: 6,
-                          paddingHorizontal: 14,
-                          marginRight: 8,
-                          marginBottom: 4,
-                        }}
-                      >
-                        <Text style={{ color: form.sport === sport.key ? '#232c3b' : '#FFFF00', fontWeight: '400', letterSpacing: 0.5 }}>{getSportLabel(sport.key, language)}</Text>
-                      </TouchableOpacity>
-                    ))}
+                              <View style={{ backgroundColor: '#fff', borderRadius: 20, padding: 24, width: 340, elevation: 8, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 8 }}>
+                  <Text style={{ color: '#00D4AA', fontSize: 20, fontWeight: '700', marginBottom: 16, letterSpacing: 0.5 }}>{t.newMatch}</Text>
+                  {/* Sport selection dropdown */}
+                  <View style={{ marginBottom: 16 }}>
+                    <Text style={{ color: '#000', marginBottom: 8, fontWeight: '600' }}>{t.sport}</Text>
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                      {SPORTS.map(sport => (
+                        <TouchableOpacity
+                          key={sport.key}
+                          onPress={() => setForm(f => ({ ...f, sport: sport.key }))}
+                          style={{
+                            backgroundColor: form.sport === sport.key ? '#00D4AA' : '#F3F4F6',
+                            borderRadius: 12,
+                            paddingVertical: 8,
+                            paddingHorizontal: 16,
+                            marginRight: 8,
+                            marginBottom: 8,
+                          }}
+                        >
+                          <Text style={{ color: form.sport === sport.key ? '#fff' : '#666', fontWeight: '600', letterSpacing: 0.5 }}>{getSportLabel(sport.key, language)}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
+                  {/* Level selection */}
+                  <View style={{ marginBottom: 16 }}>
+                    <Text style={{ color: '#000', marginBottom: 8, fontWeight: '600' }}>{t.level}</Text>
+                    <View style={{ flexDirection: 'row' }}>
+                      {[t.advanced, t.beginner].map(level => (
+                        <TouchableOpacity
+                          key={level}
+                          onPress={() => setForm(f => ({ ...f, level }))}
+                          style={{
+                            backgroundColor: form.level === level ? '#00D4AA' : '#F3F4F6',
+                            borderRadius: 12,
+                            paddingVertical: 8,
+                            paddingHorizontal: 20,
+                            marginRight: 12,
+                          }}
+                        >
+                          <Text style={{ color: form.level === level ? '#fff' : '#666', fontWeight: '600', letterSpacing: 0.5 }}>{level}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
+                  <TextInput placeholder={t.name} value={form.name} onChangeText={v => setForm(f => ({ ...f, name: v }))} style={{ color: '#000', backgroundColor: '#F3F4F6', borderRadius: 12, marginBottom: 12, padding: 12, fontSize: 16 }} placeholderTextColor="#666" />
+                  <TextInput placeholder={t.location} value={form.location} onChangeText={v => setForm(f => ({ ...f, location: v }))} style={{ color: '#000', backgroundColor: '#F3F4F6', borderRadius: 12, marginBottom: 12, padding: 12, fontSize: 16 }} placeholderTextColor="#666" />
+                  <TextInput placeholder={t.price} value={form.price} onChangeText={v => setForm(f => ({ ...f, price: v }))} keyboardType="numeric" style={{ color: '#000', backgroundColor: '#F3F4F6', borderRadius: 12, marginBottom: 12, padding: 12, fontSize: 16 }} placeholderTextColor="#666" />
+                  <TextInput placeholder={t.slots} value={form.slots} onChangeText={v => setForm(f => ({ ...f, slots: v }))} keyboardType="numeric" style={{ color: '#000', backgroundColor: '#F3F4F6', borderRadius: 12, marginBottom: 12, padding: 12, fontSize: 16 }} placeholderTextColor="#666" />
+                  <TextInput placeholder={t.time + ' (HH:mm)'} value={form.time} onChangeText={handleTimeInput} keyboardType="numeric" maxLength={5} style={{ color: '#000', backgroundColor: '#F3F4F6', borderRadius: 12, marginBottom: 16, padding: 12, fontSize: 16 }} placeholderTextColor="#666" />
+                  {message && <Text style={{ color: '#EF4444', marginBottom: 16, textAlign: 'center' }}>{message}</Text>}
+                  <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+                    <TouchableOpacity onPress={onClose} style={{ marginRight: 16, paddingVertical: 8, paddingHorizontal: 16 }}>
+                      <Text style={{ color: '#666', fontWeight: '600' }}>{t.cancel}</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={handleCreate} style={{ backgroundColor: '#00D4AA', borderRadius: 12, paddingVertical: 10, paddingHorizontal: 24 }}>
+                      <Text style={{ color: '#fff', fontWeight: '600', letterSpacing: 0.5 }}>{t.create}</Text>
+                    </TouchableOpacity>
                   </View>
                 </View>
-                {/* Level selection */}
-                <View style={{ marginBottom: 8 }}>
-                  <Text style={{ color: '#FFFF00', marginBottom: 4 }}>{t.level}</Text>
-                  <View style={{ flexDirection: 'row' }}>
-                    {[t.advanced, t.beginner].map(level => (
-                      <TouchableOpacity
-                        key={level}
-                        onPress={() => setForm(f => ({ ...f, level }))}
-                        style={{
-                          backgroundColor: form.level === level ? '#FFFF00' : (isDarkMode ? '#2a3441' : '#F5F5F5'),
-                          borderRadius: 8,
-                          paddingVertical: 6,
-                          paddingHorizontal: 18,
-                          marginRight: 8,
-                        }}
-                      >
-                        <Text style={{ color: form.level === level ? '#232c3b' : '#FFFF00', fontWeight: '400', letterSpacing: 0.5 }}>{level}</Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                </View>
-                <TextInput placeholder={t.name} value={form.name} onChangeText={v => setForm(f => ({ ...f, name: v }))} style={{ color: isDarkMode ? '#fff' : '#000', backgroundColor: isDarkMode ? '#2a3441' : '#F5F5F5', borderRadius: 8, marginBottom: 8, padding: 8 }} placeholderTextColor={isDarkMode ? '#b0b0b0' : '#666'} />
-                                  <TextInput placeholder={t.location} value={form.location} onChangeText={v => setForm(f => ({ ...f, location: v }))} style={{ color: isDarkMode ? '#fff' : '#000', backgroundColor: isDarkMode ? '#2a3441' : '#F5F5F5', borderRadius: 8, marginBottom: 8, padding: 8 }} placeholderTextColor={isDarkMode ? '#b0b0b0' : '#666'} />
-                                  <TextInput placeholder={t.price} value={form.price} onChangeText={v => setForm(f => ({ ...f, price: v }))} keyboardType="numeric" style={{ color: isDarkMode ? '#fff' : '#000', backgroundColor: isDarkMode ? '#2a3441' : '#F5F5F5', borderRadius: 8, marginBottom: 8, padding: 8 }} placeholderTextColor={isDarkMode ? '#b0b0b0' : '#666'} />
-                                  <TextInput placeholder={t.slots} value={form.slots} onChangeText={v => setForm(f => ({ ...f, slots: v }))} keyboardType="numeric" style={{ color: isDarkMode ? '#fff' : '#000', backgroundColor: isDarkMode ? '#2a3441' : '#F5F5F5', borderRadius: 8, marginBottom: 8, padding: 8 }} placeholderTextColor={isDarkMode ? '#b0b0b0' : '#666'} />
-                                  <TextInput placeholder={t.time + ' (HH:mm)'} value={form.time} onChangeText={handleTimeInput} keyboardType="numeric" maxLength={5} style={{ color: isDarkMode ? '#fff' : '#000', backgroundColor: isDarkMode ? '#2a3441' : '#F5F5F5', borderRadius: 8, marginBottom: 8, padding: 8 }} placeholderTextColor={isDarkMode ? '#b0b0b0' : '#666'} />
-                {message && <Text style={{ color: '#e74c3c', marginBottom: 8 }}>{message}</Text>}
-                <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
-                          <TouchableOpacity onPress={onClose} style={{ marginRight: 16 }}><Text style={{ color: '#FFFF00' }}>{t.cancel}</Text></TouchableOpacity>
-        <TouchableOpacity onPress={handleCreate}><Text style={{ color: '#FFFF00', fontWeight: '400', letterSpacing: 0.5 }}>{t.create}</Text></TouchableOpacity>
-                </View>
-              </View>
             </TouchableWithoutFeedback>
           </KeyboardAvoidingView>
         </View>
@@ -512,7 +516,8 @@ const MatchesScreen = () => {
     if (!matchIds.length) return;
     const { data } = await supabase
       .from('match_participants')
-      .select('match_id, user_id');
+      .select('match_id, user_id')
+      .in('match_id', matchIds);
     const map = {};
     for (const row of data || []) {
       if (!map[row.match_id]) map[row.match_id] = [];
@@ -682,30 +687,30 @@ const MatchesScreen = () => {
   // This keeps Image components mounted and cached
   const allMatches = matches;
   
-  // Debug logging to see what's happening
-  console.log('Selected sport:', selectedSport);
-  console.log('Total matches:', allMatches.length);
-  console.log('All matches sports:', allMatches.map(m => m.sport));
+  // Debug logging to see what's happening (only for troubleshooting)
+  // console.log('Selected sport:', selectedSport);
+  // console.log('Total matches:', allMatches.length);
+  // console.log('All matches sports:', allMatches.map(m => m.sport));
 
   // Badge counts
   const terminiCount = matches.filter(isUpcoming).length;
   const odigraniCount = matches.filter(m => isPlayed(m) && isUserParticipant(m)).length;
   const mojiCount = matches.filter(m => isUpcoming(m) && isUserParticipant(m)).length;
 
-  const ListHeader = () => (
+    const ListHeader = () => (
     <View style={styles.header}>
-              <Text style={[styles.headerTitle, { color: '#FFFF00' }]} numberOfLines={1} ellipsizeMode="tail">{t.matches}</Text>
+      <Text style={[styles.headerTitle, { color: '#000' }]} numberOfLines={1} ellipsizeMode="tail">{t.matches}</Text>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         {(userEmail === 'veljko.milovic001@gmail.com') && (
           <>
-            <TouchableOpacity style={[styles.joinBtn, { backgroundColor: '#FFFF00', marginRight: 8, height: 40, minWidth: 40, justifyContent: 'center', alignItems: 'center' }]} onPress={() => setAdminModalVisible(true)}>
-              <MaterialIcons name="admin-panel-settings" size={24} color="#181818" />
+            <TouchableOpacity style={[styles.adminBtn, { backgroundColor: '#00D4AA', marginRight: 8 }]} onPress={() => setAdminModalVisible(true)}>
+              <MaterialIcons name="admin-panel-settings" size={24} color="#fff" />
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.joinBtn, { backgroundColor: '#FFFF00', marginRight: 8, height: 40, minWidth: 40, justifyContent: 'center', alignItems: 'center' }]} onPress={() => setShowNewModal(true)}>
-              <MaterialIcons name="add" size={24} color="#181818" />
+            <TouchableOpacity style={[styles.adminBtn, { backgroundColor: '#00D4AA', marginRight: 8 }]} onPress={() => setShowNewModal(true)}>
+              <MaterialIcons name="add" size={24} color="#fff" />
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.joinBtn, { backgroundColor: '#FFFF00', height: 40, minWidth: 40, justifyContent: 'center', alignItems: 'center' }]} onPress={() => setDeleteModalVisible(true)}>
-              <MaterialIcons name="remove" size={24} color="#181818" />
+            <TouchableOpacity style={[styles.adminBtn, { backgroundColor: '#EF4444' }]} onPress={() => setDeleteModalVisible(true)}>
+              <MaterialIcons name="remove" size={24} color="#fff" />
             </TouchableOpacity>
           </>
         )}
@@ -835,58 +840,56 @@ const MatchesScreen = () => {
 
   return (
     <>
-      <AnimatedBackground isDarkMode={isDarkMode}>
-        <View style={styles.container}>
-          <FlatList
-            data={allMatches}
-            keyExtractor={item => `${item.id}-${item.sport}`}
-            ListHeaderComponent={
-              <>
-                <ListHeader />
-                {/* Message Display */}
-                {message && (
-                  <View style={[styles.message, { 
-                    color: message.includes('Greška') || message.includes('Error') ? '#e74c3c' : '#00b894',
-                    marginHorizontal: 16,
-                    marginBottom: 12,
-                    padding: 12,
-                    backgroundColor: 'rgba(0,0,0,0.1)',
-                    borderRadius: 8,
-                    textAlign: 'center'
-                  }]}>
-                    <Text style={{ color: 'inherit', textAlign: 'center' }}>{message}</Text>
-                  </View>
-                )}
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6, width: '100%', paddingHorizontal: 16 }}>
-                  {SPORTS.map(s => (
-                    <TouchableOpacity
-                      key={s.key}
-                      onPress={() => setSelectedSport(s.key)}
-                      style={{
-                        paddingVertical: 6,
-                        paddingHorizontal: 18,
-                        borderRadius: 20,
-                        backgroundColor: 'transparent',
-                        marginRight: 8,
-                        borderTopWidth: 4,
-                        borderTopColor: selectedSport === s.key ? '#FFFF00' : 'transparent',
-                      }}
-                    >
-                      <Text style={{
-                        color: selectedSport === s.key ? '#FFFF00' : '#FFFF00',
-                        fontWeight: '400',
-                        fontSize: 13,
-                        letterSpacing: 0.5,
-                      }}>{getSportLabel(s.key, language)}</Text>
-                    </TouchableOpacity>
-                  ))}
+      <View style={styles.container}>
+        <FlatList
+          data={allMatches}
+          keyExtractor={item => `${item.id}-${item.sport}`}
+          ListHeaderComponent={
+            <>
+              <ListHeader />
+              {/* Message Display */}
+              {message && (
+                <View style={[styles.message, { 
+                  color: message.includes('Greška') || message.includes('Error') ? '#EF4444' : '#10B981',
+                  marginHorizontal: 16,
+                  marginBottom: 12,
+                  padding: 12,
+                  backgroundColor: message.includes('Greška') || message.includes('Error') ? '#FEF2F2' : '#F0FDF4',
+                  borderRadius: 12,
+                  textAlign: 'center'
+                }]}>
+                  <Text style={{ color: 'inherit', textAlign: 'center' }}>{message}</Text>
                 </View>
-              </>
-            }
-            renderItem={({ item }) => {
+              )}
+              {/* Sport Selection Tabs */}
+              <ScrollView 
+                horizontal 
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.sportTabsContainer}
+                style={styles.sportTabsScrollView}
+              >
+                {SPORTS.map(s => (
+                  <TouchableOpacity
+                    key={s.key}
+                    onPress={() => setSelectedSport(s.key)}
+                    style={[
+                      styles.sportTab,
+                      selectedSport === s.key && styles.sportTabActive
+                    ]}
+                  >
+                    <Text style={[
+                      styles.sportTabText,
+                      selectedSport === s.key && styles.sportTabTextActive
+                    ]}>{getSportLabel(s.key, language)}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </>
+          }
+                          renderItem={({ item }) => {
                 const matchDate = new Date(item.time);
-                // Change: Only 5 seconds need to pass for testing
-                const matchStarted = Date.now() - matchDate.getTime() > 5 * 1000;
+                // Check if match has started (current time is past match time)
+                const matchStarted = Date.now() > matchDate.getTime();
                 const participants = participantsMap[item.id] || [];
                 const isParticipant = userId && participants.includes(userId);
                 const slotsFull = participants.length >= item.slots;
@@ -895,6 +898,9 @@ const MatchesScreen = () => {
                   userSubmission = (item.score_submissions || []).filter(s => s.user_id === userId);
                 } catch {}
                 const hasSubmitted = userSubmission.length > 0;
+                
+                // Debug logging for button visibility (only for troubleshooting)
+                // console.log('Match:', item.name, 'isParticipant:', isParticipant, 'slotsFull:', slotsFull, 'matchStarted:', matchStarted);
                 
                 // Only show matches for the selected sport, but keep them mounted
                 const shouldShow = item.sport === selectedSport;
@@ -908,74 +914,79 @@ const MatchesScreen = () => {
                       {item.sport === 'kosarka' && <BasketballImage />}
                       {item.sport === 'tenis' && <TennisImage />}
                       {!['padel', 'fudbal', 'kosarka', 'tenis'].includes(item.sport) && <PadelImage />}
+                      
                       {/* Text Overlay */}
                       <View style={styles.textOverlay}>
-                        {/* Name */}
-                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-                          <Text style={[styles.matchName, { color: '#fff', textShadowColor: 'rgba(0,0,0,0.8)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 3 }]} numberOfLines={1} ellipsizeMode="tail">{item.name}</Text>
-                          <View style={{ marginLeft: 8, backgroundColor: '#2a3441', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 2, justifyContent: 'center', alignItems: 'center', borderWidth: 0.5, borderColor: '#FFFF00' }}>
-                            <Text style={{ color: '#FFFF00', fontWeight: '400', fontSize: 12, letterSpacing: 0.5 }}>{item.level || 'Napredni'}</Text>
+                        {/* Name and Level */}
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+                          <Text style={styles.matchName} numberOfLines={1} ellipsizeMode="tail">{item.name}</Text>
+                          <View style={styles.levelBadge}>
+                            <Text style={styles.levelBadgeText}>{item.level || 'Napredni'}</Text>
                           </View>
                         </View>
+                        
                         {/* Location */}
-                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-                          <MaterialIcons name="location-on" size={16} color="#fff" style={{ marginRight: 4, textShadowColor: 'rgba(0,0,0,0.8)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 2 }} />
-                          <Text style={[styles.matchLocation, { color: '#fff', textShadowColor: 'rgba(0,0,0,0.8)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 2 }]} numberOfLines={1} ellipsizeMode="tail">{item.location}</Text>
+                        <View style={styles.infoRow}>
+                          <Ionicons name="location" size={16} color="#fff" style={styles.infoIcon} />
+                          <Text style={styles.matchLocation} numberOfLines={1} ellipsizeMode="tail">{item.location}</Text>
                         </View>
-                        {/* Date */}
-                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-                          <MaterialIcons name="event" size={16} color="#fff" style={{ marginRight: 4, textShadowColor: 'rgba(0,0,0,0.8)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 2 }} />
-                          <Text style={[styles.matchDate, { color: '#fff', textShadowColor: 'rgba(0,0,0,0.8)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 2 }]} numberOfLines={1} ellipsizeMode="tail">
-                            {matchDate.toLocaleDateString([], { day: '2-digit', month: 'short' })}
+                        
+                        {/* Date and Time */}
+                        <View style={styles.infoRow}>
+                          <Ionicons name="calendar" size={16} color="#fff" style={styles.infoIcon} />
+                          <Text style={styles.matchDateTime}>
+                            {matchDate.toLocaleDateString([], { day: '2-digit', month: 'short' })} • {matchDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </Text>
                         </View>
-                        {/* Time */}
-                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-                          <MaterialIcons name="access-time" size={16} color="#fff" style={{ marginRight: 4, textShadowColor: 'rgba(0,0,0,0.8)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 2 }} />
-                          <Text style={[styles.matchTime, { color: '#fff', textShadowColor: 'rgba(0,0,0,0.8)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 2 }]} numberOfLines={1} ellipsizeMode="tail">
-                            {matchDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </Text>
-                        </View>
-                        {/* Slots and Level only */}
-                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-                          <MaterialIcons name="people" size={16} color="#fff" style={{ marginRight: 4, textShadowColor: 'rgba(0,0,0,0.8)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 2 }} />
-                          <Text style={[styles.matchSlots, { color: '#fff', textShadowColor: 'rgba(0,0,0,0.8)', textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 2 }]} numberOfLines={1} ellipsizeMode="tail">{item.match_participants.length}/{item.slots}</Text>
+                        
+                        {/* Participants */}
+                        <View style={styles.infoRow}>
+                          <Ionicons name="people" size={16} color="#fff" style={styles.infoIcon} />
+                          <Text style={styles.matchSlots}>{participants.length}/{item.slots}</Text>
                         </View>
                       </View>
                       
-                      {/* Price positioned higher up */}
+                      {/* Price Badge */}
                       <View style={styles.priceContainer}>
-                        <Text style={[styles.matchPrice, { color: '#FFFF00', fontWeight: '400', fontSize: 12, letterSpacing: 0.5 }]} numberOfLines={1} ellipsizeMode="tail">{item.price} RSD</Text>
+                        <Text style={styles.matchPrice}>{item.price} RSD</Text>
                       </View>
                       
-                      {/* Join button positioned at bottom-right */}
+                      {/* Action Buttons */}
                       {!isParticipant && !slotsFull && !matchStarted && (
                         <View style={styles.joinButtonContainer}>
-                          <TouchableOpacity style={[styles.joinBtn, { backgroundColor: 'transparent' }]} onPress={() => handleJoinClick(item)}>
-                            <Text style={{ color: '#FFFF00', fontWeight: '400', fontSize: 12, letterSpacing: 0.5 }} numberOfLines={1} ellipsizeMode="tail">{t.join}</Text>
+                          <TouchableOpacity style={styles.joinBtn} onPress={() => handleJoinClick(item)}>
+                            <Text style={styles.joinBtnText}>{t.join}</Text>
                           </TouchableOpacity>
                         </View>
                       )}
                       {isParticipant && !matchStarted && (
                         <View style={styles.joinButtonContainer}>
-                          <TouchableOpacity style={[styles.joinBtn, { backgroundColor: 'transparent' }]} onPress={() => handleCancelJoin(item)}>
-                            <Text style={{ color: '#FFFF00', fontWeight: '400', fontSize: 12, letterSpacing: 0.5 }}>{t.cancelJoin}</Text>
+                          <TouchableOpacity style={[styles.joinBtn, { backgroundColor: '#EF4444' }]} onPress={() => handleCancelJoin(item)}>
+                            <Text style={styles.joinBtnText}>{t.cancelJoin}</Text>
                           </TouchableOpacity>
                         </View>
                       )}
                       {slotsFull && !isParticipant && !matchStarted && (
-                        <View style={[styles.joinButtonContainer, { backgroundColor: 'rgba(0,0,0,0.7)' }]}> 
-                          <Text style={{ color: '#888', fontWeight: '400', fontSize: 14, letterSpacing: 0.5 }}>Popunjeno</Text>
+                        <View style={[styles.joinButtonContainer]}> 
+                          <View style={[styles.joinBtn, { backgroundColor: 'rgba(0,0,0,0.7)', opacity: 0.8 }]}>
+                            <Text style={[styles.joinBtnText, { color: '#9CA3AF' }]}>Popunjeno</Text>
+                          </View>
                         </View>
                       )}
+                      
+
+                      
+
+                      
+
                     </View>
                     
-                    {/* Other buttons below image */}
+                    {/* Bottom Action Buttons */}
                     <View style={styles.buttonsContainer}>
                       {/* Submit Score Button (only if not submitted and match started) */}
                       {matchStarted && isParticipant && !hasSubmitted && (
                         <TouchableOpacity
-                          style={[styles.joinBtn, { backgroundColor: '#FFFF00' }]}
+                          style={[styles.scoreBtn, { backgroundColor: '#00D4AA' }]}
                           onPress={() => {
                             setScoreModalMatch(item);
                             if (item.sport === 'tenis' || item.sport === 'padel') {
@@ -987,22 +998,29 @@ const MatchesScreen = () => {
                             setScoreModalVisible(true);
                           }}
                         >
-                          <Text style={{ color: '#181818', fontWeight: '400', fontSize: 14, letterSpacing: 0.5 }}>Posalji rezultat</Text>
+                          <Text style={styles.scoreBtnText}>Posalji rezultat</Text>
                         </TouchableOpacity>
                       )}
                       {/* After submission, show a message */}
                       {matchStarted && isParticipant && hasSubmitted && (
-                        <Text style={{ color: '#FFFF00', fontWeight: '400', letterSpacing: 0.5 }}>Rezultat poslat</Text>
+                        <View style={styles.submittedContainer}>
+                          <Ionicons name="checkmark-circle" size={20} color="#10B981" />
+                          <Text style={styles.submittedText}>Rezultat poslat</Text>
+                        </View>
                       )}
                     </View>
                   </View>
                 );
               }}
-              ListEmptyComponent={<Text style={{ color: isDarkMode ? '#fff' : '#000', fontWeight: '300', paddingLeft: 24 }}>{language === 'english' ? 'No matches.' : 'Nema meceva.'}</Text>}
+              ListEmptyComponent={
+                <View style={styles.emptyContainer}>
+                  <Ionicons name="calendar-outline" size={48} color="#9CA3AF" />
+                  <Text style={styles.emptyText}>{language === 'english' ? 'No matches available.' : 'Nema dostupnih meceva.'}</Text>
+                </View>
+              }
               style={{ width: '100%' }}
             />
           </View>
-        </AnimatedBackground>
         {/* Delete Matches Modal */}
         <Modal visible={deleteModalVisible} animationType="slide" transparent>
           <View style={styles.modalBg}>
@@ -1601,7 +1619,7 @@ const MatchesScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'transparent',
+    backgroundColor: '#fff',
     paddingTop: 40,
   },
   header: {
@@ -1610,222 +1628,77 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 24,
-    marginBottom: 8,
+    marginBottom: 16,
   },
   headerTitle: {
-    color: '#fff',
-    fontSize: 22,
-    fontWeight: '300',
-    letterSpacing: 0.8,
+    color: '#000',
+    fontSize: 28,
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
-  headerIconBtn: {
-    marginLeft: 12,
-    backgroundColor: '#232c3b',
-    borderRadius: 8,
-    padding: 6,
+  adminBtn: {
+    backgroundColor: '#00D4AA',
+    borderRadius: 12,
+    padding: 12,
+    minWidth: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
-  sportTabs: {
+  sportTabsScrollView: {
+    marginBottom: 16,
+  },
+  sportTabsContainer: {
     flexDirection: 'row',
-    width: '100%',
     paddingHorizontal: 16,
-    marginBottom: 8,
+    paddingRight: 20,
   },
   sportTab: {
-    paddingVertical: 6,
-    paddingHorizontal: 18,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
     borderRadius: 20,
-    backgroundColor: 'transparent',
-    marginRight: 8,
+    backgroundColor: '#F3F4F6',
+    marginRight: 10,
+    borderWidth: 2,
+    borderColor: 'transparent',
+    minWidth: 80,
+    alignItems: 'center',
   },
   sportTabActive: {
-    backgroundColor: '#181818',
+    backgroundColor: '#00D4AA',
+    borderColor: '#00D4AA',
   },
   sportTabText: {
-    color: '#b0b0b0',
-    fontWeight: '400',
-    fontSize: 13,
+    color: '#666',
+    fontWeight: '600',
+    fontSize: 14,
     letterSpacing: 0.5,
   },
   sportTabTextActive: {
-    color: '#FFD600',
-  },
-  statusTabs: {
-    flexDirection: 'row',
-    width: '100%',
-    paddingHorizontal: 16,
-    marginBottom: 12,
-  },
-  statusTab: {
-    paddingVertical: 4,
-    paddingHorizontal: 14,
-    borderRadius: 16,
-    backgroundColor: 'transparent',
-    marginRight: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  statusTabActive: {
-    backgroundColor: '#181818',
-  },
-  statusTabText: {
-    color: '#b0b0b0',
-    fontWeight: '400',
-    fontSize: 12,
-    letterSpacing: 0.5,
-  },
-  statusTabTextActive: {
-    color: '#FFD600',
-  },
-  statusBadge: {
-    backgroundColor: '#232c3b',
-    borderRadius: 10,
-    marginLeft: 6,
-    paddingHorizontal: 6,
-    paddingVertical: 1,
-  },
-  statusBadgeText: {
     color: '#fff',
-    fontSize: 11,
-    fontWeight: '400',
-    letterSpacing: 0.5,
   },
   matchCard: {
-    backgroundColor: 'transparent',
-    padding: 18,
-    marginVertical: 10,
-    width: 380,
-    alignSelf: 'center',
-
-  },
-  matchDate: {
-    color: '#fff',
-    fontWeight: '400',
-    fontSize: 14,
-    marginBottom: 2,
-    letterSpacing: 0.5,
-  },
-  matchTime: {
-    color: '#b0b0b0',
-    fontSize: 14,
-    marginBottom: 2,
-  },
-  statusConfirmed: {
-    backgroundColor: '#1de9b6',
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 2,
-    alignSelf: 'flex-start',
-  },
-  statusConfirmedText: {
-    color: '#232c3b',
-    fontWeight: '400',
-    fontSize: 12,
-    letterSpacing: 0.5,
-  },
-  matchName: {
-    color: '#fff',
-    fontWeight: '400',
-    fontSize: 18,
-    marginBottom: 2,
-    letterSpacing: 0.5,
-  },
-  matchLocation: {
-    color: '#b0b0b0',
-    fontSize: 15,
-    marginBottom: 2,
-  },
-  matchSlots: {
-    color: '#fff',
-    fontSize: 15,
-    marginRight: 8,
-  },
-  matchLevel: {
-    backgroundColor: '#7c4dff',
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    marginRight: 8,
-  },
-  matchLevelText: {
-    color: '#fff',
-    fontWeight: '400',
-    fontSize: 12,
-    letterSpacing: 0.5,
-  },
-  matchPrice: {
-    color: '#fff',
-    fontWeight: '400',
-    fontSize: 14,
-    marginLeft: 'auto',
-    letterSpacing: 0.5,
-  },
-  joinBtn: {
     backgroundColor: '#fff',
-    borderRadius: 8,
-    paddingVertical: 8,
-    alignItems: 'center',
-    marginTop: 4,
-  },
-  joinBtnText: {
-    color: '#232c3b',
-    fontWeight: '400',
-    fontSize: 14,
-    letterSpacing: 0.5,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '400',
-    color: '#232c3b',
-    marginBottom: 20,
-    letterSpacing: 0.8,
-  },
-  modalBg: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    backgroundColor: '#181818',
+    marginHorizontal: 16,
+    marginVertical: 8,
     borderRadius: 16,
-    padding: 24,
-    width: 320,
-    alignItems: 'center',
-  },
-  input: {
-    width: '100%',
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 10,
-    backgroundColor: '#fff',
-  },
-  modalBtn: {
-    backgroundColor: '#00b894',
-    paddingVertical: 10,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-    marginTop: 10,
-    marginHorizontal: 5,
-  },
-  modalBtnText: {
-    color: '#fff',
-    fontWeight: '400',
-    fontSize: 14,
-    letterSpacing: 0.5,
-  },
-  message: {
-    color: 'red',
-    marginBottom: 10,
-    textAlign: 'center',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    overflow: 'hidden',
   },
   sportImageContainer: {
     position: 'relative',
     width: '100%',
-    height: 150,
-    borderRadius: 10,
+    height: 180,
+    borderRadius: 16,
     overflow: 'hidden',
-    marginBottom: 10,
   },
   sportImage: {
     width: '100%',
@@ -1840,32 +1713,248 @@ const styles = StyleSheet.create({
     padding: 16,
     justifyContent: 'flex-start',
     alignItems: 'flex-start',
+    backgroundColor: 'rgba(0,0,0,0.4)',
   },
-  buttonsContainer: {
-    marginTop: 8,
+  matchName: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 20,
+    marginBottom: 8,
+    letterSpacing: 0.5,
+    textShadowColor: 'rgba(0,0,0,0.8)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
+    flex: 1,
+  },
+  levelBadge: {
+    backgroundColor: '#8B5CF6',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    marginLeft: 12,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  levelBadgeText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 12,
+    letterSpacing: 0.5,
+  },
+  infoRow: {
+    flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 8,
+  },
+  infoIcon: {
+    marginRight: 8,
+    textShadowColor: 'rgba(0,0,0,0.8)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+  },
+  matchLocation: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '500',
+    letterSpacing: 0.5,
+    textShadowColor: 'rgba(0,0,0,0.8)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+  },
+  matchDateTime: {
+    color: '#fff',
+    fontWeight: '500',
+    fontSize: 14,
+    letterSpacing: 0.5,
+    textShadowColor: 'rgba(0,0,0,0.8)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+  },
+  matchSlots: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '500',
+    letterSpacing: 0.5,
+    textShadowColor: 'rgba(0,0,0,0.8)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
   priceContainer: {
     position: 'absolute',
     top: 16,
     right: 16,
-    backgroundColor: '#2a3441',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderWidth: 0.5,
-    borderColor: '#FFFF00',
+    backgroundColor: '#00D4AA',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  matchPrice: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 14,
+    letterSpacing: 0.5,
   },
   joinButtonContainer: {
     position: 'absolute',
-    bottom: 16,
-    right: 16,
-    backgroundColor: '#2a3441',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderWidth: 0.5,
-    borderColor: '#FFFF00',
+    bottom: 20,
+    right: 20,
+    borderRadius: 12,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    zIndex: 10,
+  },
+  joinBtn: {
+    backgroundColor: '#00D4AA',
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    minWidth: 100,
+    minHeight: 44,
+  },
+  joinBtnText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 16,
+    letterSpacing: 0.5,
+    textAlign: 'center',
+    textShadowColor: 'rgba(0,0,0,0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  buttonsContainer: {
+    padding: 16,
+    alignItems: 'center',
+  },
+  scoreBtn: {
+    backgroundColor: '#00D4AA',
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  scoreBtnText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 16,
+    letterSpacing: 0.5,
+  },
+  submittedContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F0FDF4',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#10B981',
+  },
+  submittedText: {
+    color: '#10B981',
+    fontWeight: '600',
+    fontSize: 14,
+    letterSpacing: 0.5,
+    marginLeft: 8,
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 48,
+  },
+  emptyText: {
+    color: '#9CA3AF',
+    fontWeight: '500',
+    fontSize: 16,
+    letterSpacing: 0.5,
+    marginTop: 16,
+    textAlign: 'center',
+  },
+  message: {
+    marginHorizontal: 16,
+    marginBottom: 12,
+    padding: 16,
+    borderRadius: 12,
+    textAlign: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#000',
+    marginBottom: 20,
+    letterSpacing: 0.5,
+  },
+  modalBg: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 24,
+    width: 320,
+    alignItems: 'center',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+  },
+  input: {
+    width: '100%',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+    backgroundColor: '#F9FAFB',
+    fontSize: 16,
+  },
+  modalBtn: {
+    backgroundColor: '#00D4AA',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    marginTop: 16,
+    marginHorizontal: 8,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  modalBtnText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 16,
+    letterSpacing: 0.5,
   },
 });
 

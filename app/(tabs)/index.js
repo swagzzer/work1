@@ -343,8 +343,14 @@ const StartScreen = () => {
       noMatchHistory: 'Nemate odigranih meceva.',
       onlineFriends: 'Aktivni prijatelji',
       activePlayers: 'Aktivni igraci',
+      activeFriends: 'Aktivni prijatelji',
+      leaderboard: 'Rank lista',
       inviteFriendsTitle: 'Pozovi prijatelje',
       inviteFriendsDescription: 'Podeli Sastav sa svojim prijateljima!',
+      shareAppLink: 'Podeli link aplikacije',
+      rateWhoYouPlayed: 'Oceni sa kim si igrao',
+      seeSportRankings: 'Vidi rang liste sportova',
+      yourPastMatches: 'Tvoji prosli mecevi',
       close: 'Zatvori',
       victory: 'Pobeda',
       defeat: 'Poraz',
@@ -356,7 +362,9 @@ const StartScreen = () => {
       search: 'Pretraži',
       noResults: 'Nema rezultata.',
       todayMatchesTitle: 'Danasnji mecevi',
+      todayMatches: 'Danasnji mecevi',
       noMatchesTodayText: 'Nema meceva danas.',
+      noFeaturedMatches: 'Nema istaknutih meceva',
       selectYourSport: 'Izaberi sport',
       alreadyChosen: 'Vec izabran',
     },
@@ -383,6 +391,7 @@ const StartScreen = () => {
       matchHistory: 'Match history',
       ratePlayersTitle: 'Rate Players',
       ratePlayersText: 'Rate players here.',
+      leaderboard: 'Leaderboard',
       matchHistoryTitle: 'Match History',
       rankListTitle: 'Rank List',
       notifications: 'Notifications',
@@ -396,8 +405,13 @@ const StartScreen = () => {
       noMatchHistory: 'You have no played matches.',
       onlineFriends: 'Active friends',
       activePlayers: 'Active players',
+      activeFriends: 'Active Friends',
       inviteFriendsTitle: 'Invite Friends',
       inviteFriendsDescription: 'Share Sastav with your friends!',
+      shareAppLink: 'Share app link',
+      rateWhoYouPlayed: 'Rate who you played',
+      seeSportRankings: 'See sport rankings',
+      yourPastMatches: 'Your past matches',
       close: 'Close',
       victory: 'Victory',
       defeat: 'Defeat',
@@ -409,7 +423,9 @@ const StartScreen = () => {
       search: 'Search',
       noResults: 'No results.',
       todayMatchesTitle: 'Today\'s matches',
+      todayMatches: 'Matches Today',
       noMatchesTodayText: 'No matches today.',
+      noFeaturedMatches: 'No featured matches yet',
       selectYourSport: 'Select Your Sport',
       alreadyChosen: 'Already chosen',
     }
@@ -503,6 +519,14 @@ const StartScreen = () => {
       .eq('status', 'scheduled') // Only show scheduled matches
       .order('time', { ascending: true });
     setMatchesToday(todayMatchesData ? todayMatchesData.slice(0, 2) : []);
+    
+    // Update stats with matches count
+    if (todayMatchesData) {
+      setStats(prev => ({
+        ...prev,
+        matches: todayMatchesData.length
+      }));
+    }
   }
 
   // Fetch request senders info
@@ -664,10 +688,11 @@ const StartScreen = () => {
         .select('*', { count: 'exact', head: true })
         .gt('last_active', new Date(Date.now() - 2 * 60 * 1000).toISOString());
       setActiveUsersCount(activeCount || 0);
-      setStats({
+      setStats(prev => ({
+        ...prev,
         friends: friendsCount,
         active: activeCount || 0, // use all active users count
-      });
+      }));
       // Pass both preview and all friends to OnlineFriends
       setFriendsPreview({ preview: allFriendsWithProfiles, all: allFriendsWithProfiles });
     };
@@ -711,8 +736,8 @@ const StartScreen = () => {
     { type: 'header', key: 'header' },
     { type: 'hero', key: 'hero' },
     { type: 'stats', key: 'stats' },
-    { type: 'friends', key: 'friends' },
     { type: 'matches', key: 'matches' },
+    { type: 'friends', key: 'friends' },
     { type: 'actions', key: 'actions' },
   ];
 
@@ -722,41 +747,41 @@ const StartScreen = () => {
         return (
           <View style={{ width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: scale(38), marginBottom: verticalScale(18), paddingHorizontal: scale(16) }}>
             <View style={{ marginLeft: scale(12) }}>
-                              <Text style={{ color: '#fff', fontWeight: '300', fontSize: responsiveFontSize(14), marginBottom: scale(2) }}>{t.welcome}</Text>
-              <Text style={{ color: '#FFFF00', fontWeight: '300', fontSize: responsiveFontSize(22), letterSpacing: 0.8 }}>{t.sastav}</Text>
+                              <Text style={{ color: '#000', fontWeight: '300', fontSize: responsiveFontSize(14), marginBottom: scale(2) }}>{t.welcome}</Text>
+              <Text style={{ color: '#00D4AA', fontWeight: '300', fontSize: responsiveFontSize(22), letterSpacing: 0.8 }}>{t.sastav}</Text>
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
 
               
               {/* Language Toggle */}
               <TouchableOpacity 
-                                  style={{ backgroundColor: '#2a3441', borderRadius: scale(8), padding: scale(8), marginRight: scale(8), minWidth: scale(38), minHeight: scale(38), justifyContent: 'center', alignItems: 'center' }}
+                                  style={{ backgroundColor: '#F3F4F6', borderRadius: scale(8), padding: scale(8), marginRight: scale(8), minWidth: scale(38), minHeight: scale(38), justifyContent: 'center', alignItems: 'center' }}
                 onPress={handleLanguageToggle}
               >
-                <Text style={{ color: '#FFFF00', fontSize: responsiveFontSize(14), fontWeight: '300', letterSpacing: 0.5 }}>
+                <Text style={{ color: '#00D4AA', fontSize: responsiveFontSize(14), fontWeight: '600', letterSpacing: 0.5 }}>
                   {language === 'serbian' ? 'EN' : 'SR'}
                 </Text>
               </TouchableOpacity>
               
               {/* Notifications */}
               <TouchableOpacity 
-                                  style={{ backgroundColor: '#2a3441', borderRadius: scale(8), padding: scale(8), position: 'relative', marginRight: scale(8), minWidth: scale(38), minHeight: scale(38), justifyContent: 'center', alignItems: 'center' }}
+                                  style={{ backgroundColor: '#F3F4F6', borderRadius: scale(8), padding: scale(8), position: 'relative', marginRight: scale(8), minWidth: scale(38), minHeight: scale(38), justifyContent: 'center', alignItems: 'center' }}
                 onPress={openNotifications}
               >
-                <Ionicons name="notifications-outline" size={scale(22)} color="#FFFF00" />
+                <Ionicons name="notifications-outline" size={scale(22)} color="#00D4AA" />
                 {friendRequests.length > 0 && (
                   <View style={{ 
                     position: 'absolute', 
                     top: -2, 
                     right: -2, 
-                    backgroundColor: '#FFD600', 
+                    backgroundColor: '#EF4444', 
                     borderRadius: scale(10), 
                     minWidth: scale(20), 
                     height: scale(20), 
                     justifyContent: 'center', 
                     alignItems: 'center' 
                   }}>
-                    <Text style={{ color: '#111', fontSize: responsiveFontSize(9), fontWeight: '400', letterSpacing: 0.5 }}>
+                    <Text style={{ color: '#fff', fontSize: responsiveFontSize(9), fontWeight: '600', letterSpacing: 0.5 }}>
                       {friendRequests.length > 9 ? '9+' : friendRequests.length}
                     </Text>
                   </View>
@@ -765,10 +790,10 @@ const StartScreen = () => {
               
               {/* Add Button */}
               <TouchableOpacity
-                style={{ backgroundColor: '#2a3441', borderRadius: scale(8), padding: scale(8), minWidth: scale(38), minHeight: scale(38), justifyContent: 'center', alignItems: 'center' }}
+                style={{ backgroundColor: '#F3F4F6', borderRadius: scale(8), padding: scale(8), minWidth: scale(38), minHeight: scale(38), justifyContent: 'center', alignItems: 'center' }}
                 onPress={() => { setShowSportSelectionModal(true); setSelectedSport(null); }}
               >
-                <Ionicons name="add" size={scale(22)} color="#FFFF00" />
+                <Ionicons name="add" size={scale(22)} color="#00D4AA" />
               </TouchableOpacity>
             </View>
           </View>
@@ -776,7 +801,7 @@ const StartScreen = () => {
       case 'hero':
         return (
           <View style={{ width: '100%', marginTop: scale(0), marginBottom: scale(8) }}>
-            <View style={{ width: '100%', height: scale(156), position: 'relative' }}>
+            <View style={{ width: '100%', height: scale(200), position: 'relative' }}>
               {/* Background Image */}
               <Image 
                 source={heroImages[heroIndex]} 
@@ -796,58 +821,69 @@ const StartScreen = () => {
                 left: 0, 
                 width: '100%', 
                 height: '100%', 
-                backgroundColor: 'rgba(0, 0, 0, 0.4)' 
+                backgroundColor: 'rgba(0, 0, 0, 0.5)' 
               }} />
               
               {/* Content */}
-              <View style={{ flexDirection: 'row', width: '100%', height: '100%', alignItems: 'center', padding: scale(0), zIndex: 1 }}>
-                <View style={{ flex: 1, paddingVertical: scale(32), paddingHorizontal: scale(18), justifyContent: 'flex-start' }}>
-                  <Text
-                    style={{
-                      color: '#FFFF00',
-                      fontWeight: '300',
-                      fontSize: 16,
-                      marginBottom: 4,
-                      lineHeight: 20,
-                      textAlign: 'left',
-                      letterSpacing: 1.0,
-                    }}
-                  >
-                    {t.findSport}
-                  </Text>
-                  <Text
-                    style={{
-                      color: '#fff',
-                      fontSize: 13,
-                      marginBottom: 8,
-                      lineHeight: 16,
-                      fontWeight: '300',
-                      letterSpacing: 0.5,
-                    }}
-                  >
-                    {t.findPlayers}
-                  </Text>
-                  <TouchableOpacity
-                    style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#2a3441', borderRadius: scale(8), paddingVertical: scale(3), paddingHorizontal: scale(8), alignSelf: 'flex-start', elevation: 2, borderWidth: 0.5, borderColor: '#FFFF00' }}
-                    onPress={() => router.push('/matches')}
-                  >
-                    <Ionicons name="play" size={scale(15)} color="#FFFF00" style={{ marginRight: scale(6) }} />
-                    <Text style={{ color: '#FFFF00', fontWeight: '400', fontSize: 13, letterSpacing: 0.8 }}>{t.playNow}</Text>
-                  </TouchableOpacity>
-                </View>
-                <Animated.View style={{ marginRight: scale(18), alignItems: 'center', justifyContent: 'center' }}>
-                  <Image source={require('../../assets/images/logo.png')} style={{ width: 80, height: 80, borderRadius: 18 }} resizeMode="contain" />
-                </Animated.View>
+              <View style={{ flexDirection: 'column', width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center', padding: scale(20), zIndex: 1 }}>
+                <Text
+                  style={{
+                    color: '#fff',
+                    fontWeight: '700',
+                    fontSize: 28,
+                    marginBottom: 12,
+                    lineHeight: 32,
+                    textAlign: 'center',
+                    letterSpacing: 0.5,
+                  }}
+                >
+                  Find Your Perfect Match
+                </Text>
+                <Text
+                  style={{
+                    color: '#fff',
+                    fontSize: 16,
+                    marginBottom: 24,
+                    lineHeight: 20,
+                    fontWeight: '400',
+                    textAlign: 'center',
+                    letterSpacing: 0.3,
+                    opacity: 0.9,
+                  }}
+                >
+                  Join thousands of players and discover amazing sports experiences
+                </Text>
+                <TouchableOpacity
+                  style={{ 
+                    flexDirection: 'row', 
+                    alignItems: 'center', 
+                    backgroundColor: '#00D4AA', 
+                    borderRadius: scale(12), 
+                    paddingVertical: scale(12), 
+                    paddingHorizontal: scale(24), 
+                    borderWidth: 2, 
+                    borderColor: '#fff',
+                    elevation: 4,
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.3,
+                    shadowRadius: 4,
+                  }}
+                  onPress={() => router.push('/matches')}
+                >
+                  <Ionicons name="search" size={scale(18)} color="#fff" style={{ marginRight: scale(8) }} />
+                  <Text style={{ color: '#fff', fontWeight: '600', fontSize: 16, letterSpacing: 0.5 }}>Find Match</Text>
+                </TouchableOpacity>
               </View>
             </View>
           </View>
         );
       case 'stats':
-        return <Statistics stats={{ active: activeUsersCount }} onlineFriendsCount={onlineFriends.length} isDarkMode={true} t={t} />;
+        return <Statistics stats={{ active: activeUsersCount }} onlineFriendsCount={onlineFriends.length} isDarkMode={false} t={t} />;
       case 'friends':
-                          return <OnlineFriends key={refreshKey} friends={friendsPreview.preview} allFriends={friendsPreview.all} isDarkMode={true} t={t} />;
+                          return <OnlineFriends key={refreshKey} friends={friendsPreview.preview} allFriends={friendsPreview.all} isDarkMode={false} t={t} />;
       case 'matches':
-                          return <TodaysMatches matches={matchesToday} onSeeAll={() => setAllMatchesVisible(true)} isDarkMode={true} t={t} />;
+                          return <TodaysMatches matches={matchesToday} onSeeAll={() => setAllMatchesVisible(true)} isDarkMode={false} t={t} />;
       case 'actions':
         return (
           <QuickActions
@@ -855,12 +891,12 @@ const StartScreen = () => {
             onRatePlayers={() => setRatePlayersVisible(true)}
             onShowRankList={() => setShowRankList(true)}
             onShowMatchHistory={() => setShowMatchHistory(true)}
-            isDarkMode={true}
+            isDarkMode={false}
             t={t}
-          />
-        );
-      default:
-        return null;
+                  />
+      );
+    default:
+      return null;
     }
   };
 
@@ -992,8 +1028,7 @@ const StartScreen = () => {
   const isTeam1Winner = detailWinners.length > 0 && detailWinners[0].result === 'win';
 
   return (
-            <AnimatedBackground>
-      <View style={{ flex: 1 }}>
+      <View style={{ flex: 1, backgroundColor: '#fff' }}>
         <FlatList
           data={sections}
           renderItem={renderSection}
@@ -1274,89 +1309,209 @@ const StartScreen = () => {
         {/* Rank List Modal */}
         <Modal
           visible={showRankList}
-          animationType="fade"
-          transparent
+          animationType="slide"
+          transparent={false}
           onRequestClose={() => setShowRankList(false)}
         >
-          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.7)' }}>
-            <View style={{ width: 370, height: 600, borderRadius: 18, overflow: 'hidden', alignItems: 'stretch', justifyContent: 'flex-start', backgroundColor: '#2a3441', position: 'relative' }}>
-              <View style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', padding: 24, borderRadius: 18 }}>
-                <TouchableOpacity onPress={() => setShowRankList(false)} style={{ position: 'absolute', top: 12, right: 12, zIndex: 2 }}>
-                  <Ionicons name="close" size={28} color="#FFFF00" />
+          <View style={{ flex: 1, backgroundColor: '#fff' }}>
+            {/* Header */}
+            <View style={{ 
+              backgroundColor: '#fff', 
+              borderBottomWidth: 1, 
+              borderBottomColor: '#E5E5E5', 
+              paddingTop: 60, 
+              paddingBottom: 20,
+              elevation: 4,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 4,
+            }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 24 }}>
+                <Text style={{ fontSize: 28, fontWeight: '700', color: '#000', letterSpacing: 0.8 }}>{t.rankListTitle}</Text>
+                <TouchableOpacity 
+                  onPress={() => setShowRankList(false)} 
+                  style={{ 
+                    width: 44, 
+                    height: 44, 
+                    borderRadius: 22, 
+                    backgroundColor: '#F3F4F6', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    elevation: 2,
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 2,
+                  }}
+                >
+                  <Ionicons name="close" size={28} color="#00D4AA" />
                 </TouchableOpacity>
-                <Text style={{ color: '#FFFF00', fontWeight: '300', fontSize: 24, marginBottom: 10 }}>{t.rankListTitle}</Text>
-               {/* Sport selection tabs */}
-               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12, marginLeft: 0, width: '100%', overflow: 'hidden' }}>
-                 {/* Match Mecevi/Poruka style: transparent bg, yellow top border for active, bold yellow text for active, white for inactive, rounded corners */}
-                  {ALL_SPORTS.map(s => (
-                   <TouchableOpacity
-                     key={s.key}
-                     onPress={() => setRankSport(s.key)}
-                     style={{
-                       paddingVertical: 6,
-                       paddingHorizontal: 8,
-                       borderRadius: 16,
-                       backgroundColor: 'transparent',
-                       marginRight: 2,
-                       borderTopWidth: 4,
-                       borderTopColor: rankSport === s.key ? '#FFD600' : 'transparent',
-                     }}
-                   >
-                     <Text style={{
-                       color: rankSport === s.key ? '#FFFF00' : '#fff',
-                       fontWeight: '300',
-                       fontSize: 15,
-                     }}>
-                       {s.label}
-                     </Text>
-                   </TouchableOpacity>
-                  ))}
-                </View>
-               {/* Rank list content */}
-               {rankLoading ? (
-                 <ActivityIndicator color="#FFD600" style={{ marginTop: 24 }} />
-               ) : (
-                 <RNFlatList
-                   data={(rankListBySport[rankSport] || []).slice(0, 25)}
-                   keyExtractor={item => item.user_id}
-                   style={{ flexGrow: 0, marginBottom: 10 }}
-                   renderItem={({ item, index }) => (
-                     <View style={{
-                       flexDirection: 'row',
-                       alignItems: 'center',
-                       backgroundColor: 'transparent',
-                       borderRadius: 10,
-                       paddingVertical: 6,
-                       paddingHorizontal: 10,
-                       marginBottom: 2,
-                     }}>
-                       <Text style={{ width: 28, color: '#FFFF00', fontWeight: '300', fontSize: 16 }}>{index + 1}.</Text>
-                       <View style={{ flex: 1 }}>
-                         <Text style={{ color: '#fff', fontWeight: '300', fontSize: 15 }} numberOfLines={1} ellipsizeMode="tail">
-                           {item.profile?.name || '-'} {item.profile?.surname || ''}
-                         </Text>
-                         <Text style={{ color: '#FFFF00', fontSize: 13, fontWeight: '300' }} numberOfLines={1} ellipsizeMode="tail">
-                           @{item.profile?.username || '-'}
-                         </Text>
-                       </View>
-                       {/* Badge for top 3 */}
-                       {index === 0 && <Text style={{ fontSize: 18, marginRight: 4 }}>🥇</Text>}
-                       {index === 1 && <Text style={{ fontSize: 18, marginRight: 4 }}>🥈</Text>}
-                       {index === 2 && <Text style={{ fontSize: 18, marginRight: 4 }}>🥉</Text>}
-                       <Text style={{ color: '#FFFF00', fontWeight: '300', fontSize: 16, marginLeft: 4 }}>{item.rank}</Text>
-                     </View>
-                   )}
-                   ListEmptyComponent={<Text style={{ color: '#fff', textAlign: 'center', marginTop: 24, fontWeight: '300' }}>{t.noDataForSport}</Text>}
-                 />
-               )}
-               {/* User's own rank at the bottom */}
-               {userRank && userProfile && (
-                 <View style={{ marginTop: 10, alignItems: 'center' }}>
-                   <Text style={{ color: '#FFFF00', fontWeight: '300', fontSize: 16 }}>{t.yourRank}{userRank}</Text>
-                   <Text style={{ color: '#fff', fontSize: 15, fontWeight: '300' }}>{userProfile.name || '-'} {userProfile.surname || ''} <Text style={{ color: '#FFFF00', fontSize: 13, fontWeight: '300' }}>@{userProfile.username || '-'}</Text></Text>
-                 </View>
-               )}
               </View>
+            </View>
+
+            {/* Content */}
+            <View style={{ flex: 1, paddingHorizontal: 24, paddingTop: 24 }}>
+              {/* Sport selection tabs */}
+              <View style={{ 
+                flexDirection: 'row', 
+                alignItems: 'center', 
+                marginBottom: 24, 
+                width: '100%', 
+                overflow: 'hidden' 
+              }}>
+                {ALL_SPORTS.map(s => (
+                  <TouchableOpacity
+                    key={s.key}
+                    onPress={() => setRankSport(s.key)}
+                    style={{
+                      paddingVertical: 8,
+                      paddingHorizontal: 16,
+                      borderRadius: 20,
+                      backgroundColor: rankSport === s.key ? '#00D4AA' : '#F3F4F6',
+                      marginRight: 12,
+                      elevation: 2,
+                      shadowColor: '#000',
+                      shadowOffset: { width: 0, height: 1 },
+                      shadowOpacity: 0.1,
+                      shadowRadius: 2,
+                    }}
+                  >
+                    <Text style={{
+                      color: rankSport === s.key ? '#fff' : '#666',
+                      fontWeight: rankSport === s.key ? '700' : '600',
+                      fontSize: 14,
+                    }}>
+                      {s.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              {/* Rank list content */}
+              {rankLoading ? (
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                  <ActivityIndicator color="#00D4AA" size="large" />
+                  <Text style={{ marginTop: 16, fontSize: 16, color: '#666', fontWeight: '500' }}>Učitavanje...</Text>
+                </View>
+              ) : (
+                <RNFlatList
+                  data={(rankListBySport[rankSport] || []).slice(0, 25)}
+                  keyExtractor={item => item.user_id}
+                  style={{ flex: 1 }}
+                  showsVerticalScrollIndicator={false}
+                  renderItem={({ item, index }) => (
+                    <View style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      backgroundColor: '#fff',
+                      borderRadius: 16,
+                      padding: 20,
+                      marginBottom: 16,
+                      elevation: 4,
+                      shadowColor: '#000',
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.1,
+                      shadowRadius: 4,
+                      borderWidth: 1,
+                      borderColor: '#E5E5E5',
+                    }}>
+                      {/* Rank number */}
+                      <View style={{ 
+                        width: 48, 
+                        height: 48, 
+                        borderRadius: 24, 
+                        backgroundColor: index < 3 ? '#FFD700' : '#F3F4F6', 
+                        alignItems: 'center', 
+                        justifyContent: 'center',
+                        marginRight: 16,
+                        elevation: 2,
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 1 },
+                        shadowOpacity: 0.1,
+                        shadowRadius: 2,
+                      }}>
+                        <Text style={{ 
+                          color: index < 3 ? '#000' : '#666', 
+                          fontWeight: '700', 
+                          fontSize: 18 
+                        }}>
+                          {index + 1}
+                        </Text>
+                      </View>
+
+                      {/* Player info */}
+                      <View style={{ flex: 1 }}>
+                        <Text style={{ color: '#000', fontWeight: '600', fontSize: 16, marginBottom: 4 }} numberOfLines={1} ellipsizeMode="tail">
+                          {item.profile?.name || '-'} {item.profile?.surname || ''}
+                        </Text>
+                        <Text style={{ color: '#666', fontSize: 14, fontWeight: '500' }} numberOfLines={1} ellipsizeMode="tail">
+                          @{item.profile?.username || '-'}
+                        </Text>
+                      </View>
+
+                      {/* Medal for top 3 */}
+                      {index === 0 && <Text style={{ fontSize: 24, marginRight: 8 }}>🥇</Text>}
+                      {index === 1 && <Text style={{ fontSize: 24, marginRight: 8 }}>🥈</Text>}
+                      {index === 2 && <Text style={{ fontSize: 24, marginRight: 8 }}>🥉</Text>}
+
+                      {/* Rank points */}
+                      <View style={{ 
+                        backgroundColor: '#00D4AA', 
+                        borderRadius: 16, 
+                        paddingVertical: 8, 
+                        paddingHorizontal: 16,
+                        elevation: 2,
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 1 },
+                        shadowOpacity: 0.1,
+                        shadowRadius: 2,
+                      }}>
+                        <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>{item.rank}</Text>
+                      </View>
+                    </View>
+                  )}
+                  ListEmptyComponent={
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 40 }}>
+                      <View style={{ marginBottom: 24, opacity: 0.7 }}>
+                        <Ionicons name="trophy-outline" size={64} color="#00D4AA" />
+                      </View>
+                      <Text style={{ fontSize: 20, fontWeight: '600', color: '#000', textAlign: 'center', marginBottom: 12 }}>
+                        {t.noDataForSport}
+                      </Text>
+                      <Text style={{ fontSize: 16, color: '#666', textAlign: 'center', lineHeight: 24 }}>
+                        Nema podataka za ovaj sport
+                      </Text>
+                    </View>
+                  }
+                />
+              )}
+
+              {/* User's own rank at the bottom */}
+              {userRank && userProfile && (
+                <View style={{ 
+                  marginTop: 20, 
+                  alignItems: 'center', 
+                  backgroundColor: '#F0FDF4', 
+                  borderRadius: 16, 
+                  padding: 20,
+                  borderWidth: 2,
+                  borderColor: '#00D4AA',
+                  elevation: 4,
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 4,
+                }}>
+                  <Text style={{ color: '#00D4AA', fontWeight: '700', fontSize: 18, marginBottom: 8 }}>
+                    {t.yourRank} {userRank}
+                  </Text>
+                  <Text style={{ color: '#000', fontSize: 16, fontWeight: '600' }}>
+                    {userProfile.name || '-'} {userProfile.surname || ''} 
+                    <Text style={{ color: '#666', fontSize: 14, fontWeight: '500' }}> @{userProfile.username || '-'}</Text>
+                  </Text>
+                </View>
+              )}
             </View>
           </View>
         </Modal>
@@ -1364,128 +1519,338 @@ const StartScreen = () => {
         {/* Match History Modal */}
         <Modal
           visible={showMatchHistory}
-          animationType="fade"
-          transparent
+          animationType="slide"
+          transparent={false}
           onRequestClose={() => setShowMatchHistory(false)}
         >
-          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.7)' }}>
-            <View style={{ width: 370, height: 600, borderRadius: 18, overflow: 'hidden', alignItems: 'stretch', justifyContent: 'flex-start', backgroundColor: '#2a3441', position: 'relative' }}>
-              <View style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', padding: 24, borderRadius: 18 }}>
-                <TouchableOpacity onPress={() => setShowMatchHistory(false)} style={{ position: 'absolute', top: 12, right: 12, zIndex: 2 }}>
-                  <Ionicons name="close" size={28} color="#FFFF00" />
+          <View style={{ flex: 1, backgroundColor: '#fff' }}>
+            {/* Header */}
+            <View style={{ 
+              backgroundColor: '#fff', 
+              borderBottomWidth: 1, 
+              borderBottomColor: '#E5E5E5', 
+              paddingTop: 60, 
+              paddingBottom: 20,
+              elevation: 4,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 4,
+            }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 24 }}>
+                <Text style={{ fontSize: 28, fontWeight: '700', color: '#000', letterSpacing: 0.8 }}>{t.matchHistoryTitle}</Text>
+                <TouchableOpacity 
+                  onPress={() => setShowMatchHistory(false)} 
+                  style={{ 
+                    width: 44, 
+                    height: 44, 
+                    borderRadius: 22, 
+                    backgroundColor: '#F3F4F6', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    elevation: 2,
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 2,
+                  }}
+                >
+                  <Ionicons name="close" size={28} color="#00D4AA" />
                 </TouchableOpacity>
-                <Text style={{ color: '#FFFF00', fontWeight: '300', fontSize: 24, marginBottom: 18, textAlign: 'center' }}>{t.matchHistoryTitle}</Text>
-                {/* Sport selection tabs for match history */}
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12, width: '100%' }}>
-                  {ALL_SPORTS.map(s => (
-                    <TouchableOpacity
-                      key={s.key}
-                      onPress={() => setSelectedHistorySport(s.key)}
-                      style={{
-                        paddingVertical: 6,
-                        paddingHorizontal: 8,
-                        borderRadius: 16,
-                        backgroundColor: 'transparent',
-                        marginRight: 2,
-                        borderTopWidth: 4,
-                        borderTopColor: selectedHistorySport === s.key ? '#FFFF00' : 'transparent',
-                      }}
-                    >
-                      <Text style={{
-                        color: selectedHistorySport === s.key ? '#FFFF00' : '#fff',
-                        fontWeight: '300',
-                        fontSize: 15,
-                      }}>
-                        {s.label}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
+              </View>
+            </View>
+
+            {/* Content */}
+            <View style={{ flex: 1, paddingHorizontal: 24, paddingTop: 24 }}>
+              {/* Sport selection tabs */}
+              <View style={{ 
+                flexDirection: 'row', 
+                alignItems: 'center', 
+                marginBottom: 24, 
+                width: '100%' 
+              }}>
+                {ALL_SPORTS.map(s => (
+                  <TouchableOpacity
+                    key={s.key}
+                    onPress={() => setSelectedHistorySport(s.key)}
+                    style={{
+                      paddingVertical: 8,
+                      paddingHorizontal: 16,
+                      borderRadius: 20,
+                      backgroundColor: selectedHistorySport === s.key ? '#00D4AA' : '#F3F4F6',
+                      marginRight: 12,
+                      elevation: 2,
+                      shadowColor: '#000',
+                      shadowOffset: { width: 0, height: 1 },
+                      shadowOpacity: 0.1,
+                      shadowRadius: 2,
+                    }}
+                  >
+                    <Text style={{
+                      color: selectedHistorySport === s.key ? '#fff' : '#666',
+                      fontWeight: selectedHistorySport === s.key ? '700' : '600',
+                      fontSize: 14,
+                    }}>
+                      {s.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              {/* Match history content */}
+              {matchHistoryLoading ? (
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                  <ActivityIndicator color="#00D4AA" size="large" />
+                  <Text style={{ marginTop: 16, fontSize: 16, color: '#666', fontWeight: '500' }}>Učitavanje...</Text>
                 </View>
-                {matchHistoryLoading ? (
-                  <ActivityIndicator color="#FFFF00" style={{ marginTop: 20 }} />
-                ) : uniqueMatchHistory.length === 0 ? (
-                  <Text style={{ color: '#FFFF00', fontWeight: '300', fontSize: 18, textAlign: 'center', marginTop: 8 }}>{t.noMatchHistory}</Text>
-                ) : (
-                  <FlatList
-                    data={uniqueMatchHistory}
-                    keyExtractor={item => item.match_id?.toString()}
-                    renderItem={({ item }) => (
-                      selectedHistorySport === 'padel' && item.opponents ? (
-                        (() => {
-                          // Deduplicate opponents by id
-                          const uniqueOpponents = [];
-                          const seen = new Set();
-                          item.opponents.forEach(u => {
-                            if (u && u.id && !seen.has(u.id)) {
-                              uniqueOpponents.push(u);
-                              seen.add(u.id);
-                            }
-                          });
-                          return (
-                            <View key={item.id} style={{ backgroundColor: '#232c3b', borderRadius: 10, padding: 12, marginBottom: 12 }}>
-                              <Text style={{ color: '#FFFF00', fontWeight: '300', fontSize: 16 }}>Padel</Text>
-                              <Text style={{ color: '#fff', fontSize: 15, marginBottom: 2, fontWeight: '300' }}>
-                                Protiv: {uniqueOpponents.map(u => `${u.name} ${u.surname} @${u.username}`).join(' & ')}
+              ) : uniqueMatchHistory.length === 0 ? (
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 40 }}>
+                  <View style={{ marginBottom: 24, opacity: 0.7 }}>
+                    <Ionicons name="time-outline" size={64} color="#00D4AA" />
+                  </View>
+                  <Text style={{ fontSize: 20, fontWeight: '600', color: '#000', textAlign: 'center', marginBottom: 12 }}>
+                    {t.noMatchHistory}
+                  </Text>
+                  <Text style={{ fontSize: 16, color: '#666', textAlign: 'center', lineHeight: 24 }}>
+                    Nema istorije mečeva za ovaj sport
+                  </Text>
+                </View>
+              ) : (
+                <FlatList
+                  data={uniqueMatchHistory}
+                  keyExtractor={item => item.match_id?.toString()}
+                  style={{ flex: 1 }}
+                  showsVerticalScrollIndicator={false}
+                  renderItem={({ item }) => (
+                    selectedHistorySport === 'padel' && item.opponents ? (
+                      (() => {
+                        // Deduplicate opponents by id
+                        const uniqueOpponents = [];
+                        const seen = new Set();
+                        item.opponents.forEach(u => {
+                          if (u && u.id && !seen.has(u.id)) {
+                            uniqueOpponents.push(u);
+                            seen.add(u.id);
+                          }
+                        });
+                        return (
+                          <View key={item.id} style={{ 
+                            backgroundColor: '#fff', 
+                            borderRadius: 16, 
+                            padding: 20, 
+                            marginBottom: 16,
+                            elevation: 4,
+                            shadowColor: '#000',
+                            shadowOffset: { width: 0, height: 2 },
+                            shadowOpacity: 0.1,
+                            shadowRadius: 4,
+                            borderWidth: 1,
+                            borderColor: '#E5E5E5',
+                          }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
+                              <View style={{ 
+                                width: 48, 
+                                height: 48, 
+                                borderRadius: 24, 
+                                backgroundColor: '#00D4AA', 
+                                alignItems: 'center', 
+                                justifyContent: 'center',
+                                marginRight: 16,
+                              }}>
+                                <Ionicons name="tennisball" size={24} color="#fff" />
+                              </View>
+                              <View style={{ flex: 1 }}>
+                                <Text style={{ color: '#000', fontWeight: '600', fontSize: 18, marginBottom: 4 }}>Padel</Text>
+                                <Text style={{ color: '#666', fontSize: 14, fontWeight: '500' }}>
+                                  Protiv: {uniqueOpponents.map(u => `${u.name} ${u.surname} @${u.username}`).join(' & ')}
+                                </Text>
+                              </View>
+                            </View>
+                            
+                            <View style={{ 
+                              backgroundColor: item.result === 'win' ? '#F0FDF4' : '#FEF2F2', 
+                              borderRadius: 12, 
+                              padding: 16,
+                              borderWidth: 1,
+                              borderColor: item.result === 'win' ? '#00D4AA' : '#EF4444',
+                            }}>
+                              <Text style={{ 
+                                color: item.result === 'win' ? '#00D4AA' : '#EF4444', 
+                                fontWeight: '700', 
+                                fontSize: 16, 
+                                marginBottom: 8,
+                                textAlign: 'center',
+                              }}>
+                                {item.result === 'win' ? '🏆 Pobeda' : '❌ Poraz'}
                               </Text>
-                              <Text style={{ color: item.result === 'win' ? '#00e676' : '#ff5252', fontWeight: '300' }}>
-                                {item.result === 'win' ? 'Pobeda' : 'Poraz'}
+                              <Text style={{ color: '#000', fontSize: 14, fontWeight: '600', textAlign: 'center', marginBottom: 8 }}>
+                                Poeni: {item.points_before} → {item.points_after} 
+                                <Text style={{ color: item.points_change > 0 ? '#00D4AA' : '#EF4444' }}>
+                                  {' '}({item.points_change > 0 ? '+' : ''}{item.points_change})
+                                </Text>
                               </Text>
-                              <Text style={{ color: '#FFFF00', fontSize: 14, fontWeight: '300' }}>
-                                Poeni: {item.points_before} → {item.points_after} ({item.points_change > 0 ? '+' : ''}{item.points_change})
-                              </Text>
-                              <Text style={{ color: '#b0b8c1', fontSize: 13, marginTop: 2 }}>
+                              <Text style={{ color: '#666', fontSize: 12, textAlign: 'center' }}>
                                 {new Date(item.created_at).toLocaleString()}
                               </Text>
                             </View>
-                          );
-                        })()
-                      ) : (selectedHistorySport === 'fudbal' || selectedHistorySport === 'kosarka') ? (
-                        <View key={item.id} style={{ backgroundColor: '#232c3b', borderRadius: 10, padding: 12, marginBottom: 12, flexDirection: 'row', alignItems: 'center' }}>
+                          </View>
+                        );
+                      })()
+                    ) : (selectedHistorySport === 'fudbal' || selectedHistorySport === 'kosarka') ? (
+                      <View key={item.id} style={{ 
+                        backgroundColor: '#fff', 
+                        borderRadius: 16, 
+                        padding: 20, 
+                        marginBottom: 16,
+                        elevation: 4,
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 0.1,
+                        shadowRadius: 4,
+                        borderWidth: 1,
+                        borderColor: '#E5E5E5',
+                      }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
+                          <View style={{ 
+                            width: 48, 
+                            height: 48, 
+                            borderRadius: 24, 
+                            backgroundColor: '#00D4AA', 
+                            alignItems: 'center', 
+                            justifyContent: 'center',
+                            marginRight: 16,
+                          }}>
+                            <Ionicons name={item.sport === 'fudbal' ? 'football' : 'basketball'} size={24} color="#fff" />
+                          </View>
                           <View style={{ flex: 1 }}>
-                            <Text style={{ color: '#FFFF00', fontWeight: '300', fontSize: 16 }}>{item.sport?.charAt(0).toUpperCase() + item.sport?.slice(1)}</Text>
-                            <Text style={{ color: item.result === 'win' ? '#00e676' : '#ff5252', fontWeight: '300' }}>
-                              {item.result === 'win' ? 'Pobeda' : 'Poraz'}
+                            <Text style={{ color: '#000', fontWeight: '600', fontSize: 18, marginBottom: 4 }}>
+                              {item.sport?.charAt(0).toUpperCase() + item.sport?.slice(1)}
                             </Text>
-                            <Text style={{ color: '#FFFF00', fontSize: 14, fontWeight: '300' }}>
-                              Poeni: {item.points_before} → {item.points_after} ({item.points_change > 0 ? '+' : ''}{item.points_change})
-                            </Text>
-                            <Text style={{ color: '#b0b8c1', fontSize: 13, marginTop: 2, fontWeight: '300' }}>
-                              {new Date(item.created_at).toLocaleString()}
+                            <Text style={{ color: '#666', fontSize: 14, fontWeight: '500' }}>
+                              {item.sport === 'fudbal' ? 'Timski sport' : 'Timski sport'}
                             </Text>
                           </View>
-                          <TouchableOpacity onPress={async () => {
-                            setShowMatchHistory(false);
-                            setTimeout(async () => {
-                              setSelectedDetailMatch(item);
-                              setShowDetailModal(true);
-                              await fetchWinnersAndLosers(item.match_id);
-                            }, 300);
-                          }} style={{ alignSelf: 'center', marginLeft: 12 }}>
-                            <Text style={{ color: '#FFFF00', fontWeight: '300', fontSize: 15, textDecorationLine: 'underline', textAlign: 'right' }}>Detalji</Text>
+                        </View>
+                        
+                        <View style={{ 
+                          backgroundColor: item.result === 'win' ? '#F0FDF4' : '#FEF2F2', 
+                          borderRadius: 12, 
+                          padding: 16,
+                          borderWidth: 1,
+                          borderColor: item.result === 'win' ? '#00D4AA' : '#EF4444',
+                        }}>
+                          <Text style={{ 
+                            color: item.result === 'win' ? '#00D4AA' : '#EF4444', 
+                            fontWeight: '700', 
+                            fontSize: 16, 
+                            marginBottom: 8,
+                            textAlign: 'center',
+                          }}>
+                            {item.result === 'win' ? '🏆 Pobeda' : '❌ Poraz'}
+                          </Text>
+                          <Text style={{ color: '#000', fontSize: 14, fontWeight: '600', textAlign: 'center', marginBottom: 8 }}>
+                            Poeni: {item.points_before} → {item.points_after} 
+                            <Text style={{ color: item.points_change > 0 ? '#00D4AA' : '#EF4444' }}>
+                              {' '}({item.points_change > 0 ? '+' : ''}{item.points_change})
+                            </Text>
+                          </Text>
+                          <Text style={{ color: '#666', fontSize: 12, textAlign: 'center', marginBottom: 12 }}>
+                            {new Date(item.created_at).toLocaleString()}
+                          </Text>
+                          
+                          <TouchableOpacity 
+                            onPress={async () => {
+                              setShowMatchHistory(false);
+                              setTimeout(async () => {
+                                setSelectedDetailMatch(item);
+                                setShowDetailModal(true);
+                                await fetchWinnersAndLosers(item.match_id);
+                              }, 300);
+                            }} 
+                            style={{ 
+                              backgroundColor: '#00D4AA', 
+                              borderRadius: 12, 
+                              paddingVertical: 12, 
+                              paddingHorizontal: 20,
+                              alignItems: 'center',
+                              elevation: 2,
+                              shadowColor: '#000',
+                              shadowOffset: { width: 0, height: 1 },
+                              shadowOpacity: 0.1,
+                              shadowRadius: 2,
+                            }}
+                          >
+                            <Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>Detalji</Text>
                           </TouchableOpacity>
                         </View>
-                      ) : (
-                        <View key={item.id} style={{ backgroundColor: '#232c3b', borderRadius: 10, padding: 12, marginBottom: 12 }}>
-                                                     <Text style={{ color: '#FFFF00', fontWeight: '300', fontSize: 16 }}>{item.sport?.charAt(0).toUpperCase() + item.sport?.slice(1)}</Text>
-                          <Text style={{ color: '#fff', fontSize: 15, marginBottom: 2, fontWeight: '300' }}>
-                            Protiv: {item.opponent_name || ''} {item.opponent_surname || ''} @{item.opponent_username || ''}
+                      </View>
+                    ) : (
+                      <View key={item.id} style={{ 
+                        backgroundColor: '#fff', 
+                        borderRadius: 16, 
+                        padding: 20, 
+                        marginBottom: 16,
+                        elevation: 4,
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 0.1,
+                        shadowRadius: 4,
+                        borderWidth: 1,
+                        borderColor: '#E5E5E5',
+                      }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
+                          <View style={{ 
+                            width: 48, 
+                            height: 48, 
+                            borderRadius: 24, 
+                            backgroundColor: '#00D4AA', 
+                            alignItems: 'center', 
+                            justifyContent: 'center',
+                            marginRight: 16,
+                          }}>
+                            <Ionicons name="person" size={24} color="#fff" />
+                          </View>
+                          <View style={{ flex: 1 }}>
+                            <Text style={{ color: '#000', fontWeight: '600', fontSize: 18, marginBottom: 4 }}>
+                              {item.sport?.charAt(0).toUpperCase() + item.sport?.slice(1)}
+                            </Text>
+                            <Text style={{ color: '#666', fontSize: 14, fontWeight: '500' }}>
+                              Protiv: {item.opponent_name || ''} {item.opponent_surname || ''} @{item.opponent_username || ''}
+                            </Text>
+                          </View>
+                        </View>
+                        
+                        <View style={{ 
+                          backgroundColor: item.result === 'win' ? '#F0FDF4' : '#FEF2F2', 
+                          borderRadius: 12, 
+                          padding: 16,
+                          borderWidth: 1,
+                          borderColor: item.result === 'win' ? '#00D4AA' : '#EF4444',
+                        }}>
+                          <Text style={{ 
+                            color: item.result === 'win' ? '#00D4AA' : '#EF4444', 
+                            fontWeight: '700', 
+                            fontSize: 16, 
+                            marginBottom: 8,
+                            textAlign: 'center',
+                          }}>
+                            {item.result === 'win' ? '🏆 Pobeda' : '❌ Poraz'}
                           </Text>
-                          <Text style={{ color: item.result === 'win' ? '#00e676' : '#ff5252', fontWeight: '300' }}>
-                            {item.result === 'win' ? 'Pobeda' : 'Poraz'}
+                          <Text style={{ color: '#000', fontSize: 14, fontWeight: '600', textAlign: 'center', marginBottom: 8 }}>
+                            Poeni: {item.points_before} → {item.points_after} 
+                            <Text style={{ color: item.points_change > 0 ? '#00D4AA' : '#EF4444' }}>
+                              {' '}({item.points_change > 0 ? '+' : ''}{item.points_change})
+                            </Text>
                           </Text>
-                          <Text style={{ color: '#FFFF00', fontSize: 14, fontWeight: '300' }}>
-                            Poeni: {item.points_before} → {item.points_after} ({item.points_change > 0 ? '+' : ''}{item.points_change})
-                          </Text>
-                          <Text style={{ color: '#b0b8c1', fontSize: 13, marginTop: 2, fontWeight: '300' }}>
+                          <Text style={{ color: '#666', fontSize: 12, textAlign: 'center' }}>
                             {new Date(item.created_at).toLocaleString()}
                           </Text>
                         </View>
-                      )
-                    )}
-                    style={{ width: '100%' }}
-                  />
-                )}
-              </View>
+                      </View>
+                    )
+                  )}
+                />
+              )}
             </View>
           </View>
         </Modal>
@@ -1555,7 +1920,6 @@ const StartScreen = () => {
           </Modal>
         )}
       </View>
-    </AnimatedBackground>
   );
 };
 
