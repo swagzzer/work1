@@ -1,10 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { Linking, Modal, Text, TouchableOpacity, View } from 'react-native';
-import { scale } from '../constants/Responsive';
+import { Linking, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const InviteFriendsPopup = ({ visible, onClose, isDarkMode = true, language = 'serbian', t }) => {
-  const inviteMessage = "Pozdrav! Pridruzi se meni na Sastav aplikaciji i igraj najbolje meceve u gradu! 🏆🔵🏀🎾";
+  const inviteMessage = "Pozdrav! Pridruži se meni na Sastav aplikaciji i igraj najbolje mečeve u gradu! 🏆🔵🏀🎾";
 
   const handleInstagramInvite = () => {
     const instagramUrl = `https://www.instagram.com/`;
@@ -39,91 +38,67 @@ const InviteFriendsPopup = ({ visible, onClose, isDarkMode = true, language = 's
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
-      <View style={{ flex: 1, justifyContent: 'flex-end' }}>
-        <View style={{ 
-          backgroundColor: isDarkMode ? '#2a3441' : '#fff', 
-          borderTopLeftRadius: scale(18), 
-          borderTopRightRadius: scale(18), 
-          padding: scale(16),
-          paddingBottom: scale(20),
-          height: '30%' // Takes up 30% from bottom
-        }}>
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContainer}>
           {/* Header */}
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: scale(12) }}>
-            <Text style={{ color: '#FFFF00', fontWeight: '300', fontSize: 14, letterSpacing: 0.8 }}>{t.inviteFriendsTitle}</Text>
-            <TouchableOpacity onPress={onClose}>
-              <Ionicons name="close" size={20} color="#FFFF00" />
-            </TouchableOpacity>
+          <View style={styles.header}>
+            <View style={styles.headerContent}>
+              <Text style={styles.title}>{t.inviteFriendsTitle}</Text>
+              <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+                <Ionicons name="close" size={24} color="#00D4AA" />
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Description */}
-          <Text style={{ color: isDarkMode ? '#fff' : '#000', fontSize: 12, textAlign: 'center', marginBottom: scale(16), lineHeight: 16, fontWeight: '300' }}>
-            {t.inviteFriendsDescription}
-          </Text>
+          <View style={styles.descriptionContainer}>
+            <Text style={styles.descriptionText}>
+              {t.inviteFriendsDescription}
+            </Text>
+          </View>
 
-          {/* Social Media Options - Side by Side */}
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: scale(12) }}>
+          {/* Social Media Options */}
+          <View style={styles.socialContainer}>
             {/* Instagram */}
             <TouchableOpacity
               onPress={handleInstagramInvite}
-              style={{
-                flex: 1,
-                backgroundColor: '#E4405F',
-                borderRadius: scale(12),
-                padding: scale(12),
-                alignItems: 'center',
-                marginRight: scale(4)
-              }}
+              style={[styles.socialButton, styles.instagramButton]}
             >
-              <Ionicons name="logo-instagram" size={20} color="#FFFFFF" style={{ marginBottom: scale(4) }} />
-              <Text style={{ color: '#FFFFFF', fontWeight: '300', fontSize: 10, textAlign: 'center' }}>Instagram</Text>
+              <View style={styles.socialIconContainer}>
+                <Ionicons name="logo-instagram" size={28} color="#FFFFFF" />
+              </View>
+              <Text style={styles.socialButtonText}>Instagram</Text>
             </TouchableOpacity>
 
             {/* WhatsApp */}
             <TouchableOpacity
               onPress={handleWhatsAppInvite}
-              style={{
-                flex: 1,
-                backgroundColor: '#25D366',
-                borderRadius: scale(12),
-                padding: scale(12),
-                alignItems: 'center',
-                marginHorizontal: scale(2)
-              }}
+              style={[styles.socialButton, styles.whatsappButton]}
             >
-              <Ionicons name="logo-whatsapp" size={20} color="#FFFFFF" style={{ marginBottom: scale(4) }} />
-              <Text style={{ color: '#FFFFFF', fontWeight: '300', fontSize: 10, textAlign: 'center' }}>WhatsApp</Text>
+              <View style={styles.socialIconContainer}>
+                <Ionicons name="logo-whatsapp" size={28} color="#FFFFFF" />
+              </View>
+              <Text style={styles.socialButtonText}>WhatsApp</Text>
             </TouchableOpacity>
 
             {/* Viber */}
             <TouchableOpacity
               onPress={handleViberInvite}
-              style={{
-                flex: 1,
-                backgroundColor: '#7360F2',
-                borderRadius: scale(12),
-                padding: scale(12),
-                alignItems: 'center',
-                marginLeft: scale(4)
-              }}
+              style={[styles.socialButton, styles.viberButton]}
             >
-              <Ionicons name="chatbubble" size={20} color="#FFFFFF" style={{ marginBottom: scale(4) }} />
-              <Text style={{ color: '#FFFFFF', fontWeight: '300', fontSize: 10, textAlign: 'center' }}>Viber</Text>
+              <View style={styles.socialIconContainer}>
+                <Ionicons name="chatbubble" size={28} color="#FFFFFF" />
+              </View>
+              <Text style={styles.socialButtonText}>Viber</Text>
             </TouchableOpacity>
           </View>
 
           {/* Close Button */}
           <TouchableOpacity
             onPress={onClose}
-            style={{
-              backgroundColor: '#FFFF00',
-              borderRadius: scale(8),
-              padding: scale(8),
-              alignItems: 'center',
-              marginTop: 'auto'
-            }}
+            style={styles.closeButtonContainer}
           >
-            <Text style={{ color: '#000', fontWeight: '300', fontSize: 12, letterSpacing: 0.5 }}>
+            <Text style={styles.closeButtonText}>
               {t.close}
             </Text>
           </TouchableOpacity>
@@ -132,5 +107,134 @@ const InviteFriendsPopup = ({ visible, onClose, isDarkMode = true, language = 's
     </Modal>
   );
 };
+
+const styles = StyleSheet.create({
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'transparent',
+  },
+  modalContainer: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 28,
+    paddingBottom: 50,
+    height: '50%',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+  },
+  header: {
+    marginBottom: 24,
+  },
+  headerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#000',
+    letterSpacing: 0.5,
+  },
+  closeButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#F3F4F6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  descriptionContainer: {
+    marginBottom: 28,
+    paddingHorizontal: 8,
+  },
+  descriptionText: {
+    color: '#000',
+    fontSize: 16,
+    lineHeight: 24,
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  socialContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 28,
+    paddingHorizontal: 4,
+  },
+  socialButton: {
+    flex: 1,
+    borderRadius: 18,
+    padding: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 4,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    minWidth: 110, // Balanced width for text to fit on one line
+    textAlign: 'center',
+  },
+  instagramButton: {
+    backgroundColor: '#E4405F',
+  },
+  whatsappButton: {
+    backgroundColor: '#25D366',
+  },
+  viberButton: {
+    backgroundColor: '#7360F2',
+  },
+  socialIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  socialButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 16,
+    textAlign: 'center',
+    letterSpacing: 0.5,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+    alignSelf: 'center',
+    flex: 1,
+    textAlignVertical: 'center',
+  },
+  closeButtonContainer: {
+    backgroundColor: '#00D4AA',
+    borderRadius: 20,
+    paddingVertical: 18,
+    paddingHorizontal: 32,
+    alignItems: 'center',
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+  },
+  closeButtonText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 18,
+    letterSpacing: 0.5,
+  },
+});
 
 export default InviteFriendsPopup; 

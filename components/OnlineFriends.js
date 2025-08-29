@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Dimensions, Image, Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { cappedFontSize, scale, verticalScale } from '../constants/Responsive';
-import AnimatedBackground from './AnimatedBackground';
+
 
 const STATUS_SIZE = scale(12);
 
@@ -24,7 +24,7 @@ function isFriendOnline(profile) {
   return (now - lastActive) < 2 * 60 * 1000;
 }
 
-const OnlineFriends = ({ friends, allFriends, isDarkMode = true, t }) => {
+const OnlineFriends = ({ friends, allFriends, isDarkMode = false, t }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const { width, height } = Dimensions.get('window');
   const modalWidth = width * 0.85;
@@ -50,7 +50,7 @@ const OnlineFriends = ({ friends, allFriends, isDarkMode = true, t }) => {
     return (
       <TouchableOpacity
         key={f.profile?.id || idx}
-        style={{ flexDirection: 'row', alignItems: 'center', marginBottom: verticalScale(12), borderBottomWidth: idx !== arr.length - 1 ? 1 : 0, borderBottomColor: isDarkMode ? '#3a3a6a' : '#E0E0E0', paddingBottom: verticalScale(8) }}
+        style={{ flexDirection: 'row', alignItems: 'center', marginBottom: verticalScale(12), borderBottomWidth: idx !== arr.length - 1 ? 1 : 0, borderBottomColor: '#E0E0E0', paddingBottom: verticalScale(8) }}
         onPress={() => {
           if (f.profile?.id) router.push(`/profile/${f.profile.id}`);
         }}
@@ -74,11 +74,11 @@ const OnlineFriends = ({ friends, allFriends, isDarkMode = true, t }) => {
               width: scale(28),
               height: scale(28),
               borderRadius: scale(14),
-              backgroundColor: '#FFFF00',
+              backgroundColor: '#00D4AA',
               justifyContent: 'center',
               alignItems: 'center',
             }}>
-              <Text style={{ color: '#181818', fontWeight: '600', fontSize: scale(18) }}>
+              <Text style={{ color: '#fff', fontWeight: '600', fontSize: scale(18) }}>
                 {f.profile?.name?.[0]?.toUpperCase() || f.profile?.username?.[0]?.toUpperCase() || '?'}
               </Text>
             </View>
@@ -93,12 +93,12 @@ const OnlineFriends = ({ friends, allFriends, isDarkMode = true, t }) => {
             borderRadius: STATUS_SIZE / 2,
             backgroundColor: online ? '#4caf50' : '#888',
             borderWidth: 2,
-            borderColor: isDarkMode ? '#2a3441' : '#fff',
+            borderColor: '#fff',
           }} />
         </View>
         <View>
-          <Text style={{ color: isDarkMode ? '#fff' : '#000', fontWeight: '400', fontSize: cappedFontSize(14, 15), letterSpacing: 0.5 }}>{f.profile?.name} {f.profile?.surname}</Text>
-          <Text style={{ color: isDarkMode ? '#b0b8c1' : '#666', fontSize: cappedFontSize(14, 15) }}>@{f.profile?.username}</Text>
+          <Text style={{ color: '#000', fontWeight: '400', fontSize: cappedFontSize(14, 15), letterSpacing: 0.5 }}>{f.profile?.name} {f.profile?.surname}</Text>
+          <Text style={{ color: '#666', fontSize: cappedFontSize(14, 15) }}>@{f.profile?.username}</Text>
         </View>
       </TouchableOpacity>
     );
@@ -109,7 +109,7 @@ const OnlineFriends = ({ friends, allFriends, isDarkMode = true, t }) => {
     return (
       <TouchableOpacity
         key={f.profile?.id || idx}
-        style={{ flexDirection: 'row', alignItems: 'center', marginBottom: verticalScale(12), borderBottomWidth: idx !== arr.length - 1 ? 1 : 0, borderBottomColor: isDarkMode ? '#3a3a6a' : '#E0E0E0', paddingBottom: verticalScale(8) }}
+        style={{ flexDirection: 'row', alignItems: 'center', marginBottom: verticalScale(12), borderBottomWidth: idx !== arr.length - 1 ? 1 : 0, borderBottomColor: '#E0E0E0', paddingBottom: verticalScale(8) }}
         onPress={() => {
           if (f.profile?.id) {
             setModalVisible(false);
@@ -136,11 +136,11 @@ const OnlineFriends = ({ friends, allFriends, isDarkMode = true, t }) => {
               width: scale(28),
               height: scale(28),
               borderRadius: scale(14),
-              backgroundColor: '#FFFF00',
+              backgroundColor: '#00D4AA',
               justifyContent: 'center',
               alignItems: 'center',
             }}>
-              <Text style={{ color: '#181818', fontWeight: '600', fontSize: scale(18) }}>
+              <Text style={{ color: '#fff', fontWeight: '600', fontSize: scale(18) }}>
                 {f.profile?.name?.[0]?.toUpperCase() || f.profile?.username?.[0]?.toUpperCase() || '?'}
               </Text>
             </View>
@@ -155,12 +155,12 @@ const OnlineFriends = ({ friends, allFriends, isDarkMode = true, t }) => {
             borderRadius: STATUS_SIZE / 2,
             backgroundColor: online ? '#4caf50' : '#888',
             borderWidth: 2,
-            borderColor: isDarkMode ? '#2a3441' : '#fff',
+            borderColor: '#fff',
           }} />
         </View>
         <View>
-          <Text style={{ color: isDarkMode ? '#fff' : '#000', fontWeight: '400', fontSize: cappedFontSize(14, 15), letterSpacing: 0.5 }}>{f.profile?.name} {f.profile?.surname}</Text>
-          <Text style={{ color: isDarkMode ? '#b0b8c1' : '#666', fontSize: cappedFontSize(14, 15) }}>@{f.profile?.username}</Text>
+          <Text style={{ color: '#000', fontWeight: '400', fontSize: cappedFontSize(14, 15), letterSpacing: 0.5 }}>{f.profile?.name} {f.profile?.surname}</Text>
+          <Text style={{ color: '#666', fontSize: scale(14, 15) }}>@{f.profile?.username}</Text>
         </View>
       </TouchableOpacity>
     );
@@ -170,33 +170,22 @@ const OnlineFriends = ({ friends, allFriends, isDarkMode = true, t }) => {
     <>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: verticalScale(8) }}>
         <Text style={{ 
-          color: '#FFFF00', 
-          fontWeight: '600', 
-          fontSize: cappedFontSize(17, 18), 
+          color: '#000', 
+          fontWeight: '700', 
+          fontSize: cappedFontSize(20, 22), 
           alignSelf: 'flex-start', 
           marginLeft: 0, 
           marginTop: verticalScale(8), 
           marginBottom: verticalScale(8), 
-          letterSpacing: 0.8,
-          // Enhanced styling for eye-catching appearance
-          textShadowColor: 'rgba(0,0,0,0.8)',
-          textShadowOffset: { width: 2, height: 2 },
-          textShadowRadius: 4,
-          // Alternative: Add a subtle glow effect
-          // textShadowColor: '#FFFF00',
-          // textShadowOffset: { width: 0, height: 0 },
-          // textShadowRadius: 8,
+          letterSpacing: 0.5,
         }}>{t.friends}</Text>
         <TouchableOpacity 
           onPress={() => setModalVisible(true)}
           style={{
-            // Option 1: Match "Igraj sada" button style (currently active)
-            backgroundColor: '#2a3441',
+            backgroundColor: 'transparent',
             borderRadius: 8,
             paddingVertical: 6,
             paddingHorizontal: 12,
-            borderWidth: 0.5,
-            borderColor: '#FFFF00',
             elevation: 2,
             
             // Option 2: Rounded pill style (uncomment to use)
@@ -236,37 +225,33 @@ const OnlineFriends = ({ friends, allFriends, isDarkMode = true, t }) => {
           }}
         >
           <Text style={{ 
-            color: '#FFFF00', 
+            color: '#00D4AA', 
             fontSize: cappedFontSize(15, 15),
-            fontWeight: '500',
+            fontWeight: '600',
             textAlign: 'center',
-            
-            // For Option 4 (filled button), change to:
-            // color: '#2a3441',
           }}>{t.seeAll}</Text>
         </TouchableOpacity>
       </View>
       <View style={{ width: scale(340), marginBottom: verticalScale(18) }}>
         {preview.length > 0 ? (
-          <View style={{ backgroundColor: isDarkMode ? '#2a3441' : '#F5F5F5', borderRadius: scale(18), padding: scale(18) }}>
+          <View style={{ backgroundColor: '#fff', borderRadius: scale(18), padding: scale(18), elevation: 4, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4 }}>
             {preview.map((f, idx) => renderFriend(f, idx, preview))}
           </View>
         ) : (
-          <View style={{ backgroundColor: isDarkMode ? '#2a3441' : '#F5F5F5', borderRadius: scale(18), padding: scale(28), alignItems: 'center', justifyContent: 'center' }}>
-            <Ionicons name="people" size={scale(44)} color="#FFFF00" style={{ marginBottom: verticalScale(10) }} />
-            <Text style={{ color: '#FFFF00', fontWeight: '300', fontSize: cappedFontSize(16, 17), marginBottom: verticalScale(4), letterSpacing: 0.8 }}>{t.noFriends}</Text>
-            <Text style={{ color: isDarkMode ? '#fff' : '#000', fontWeight: '300', fontSize: cappedFontSize(15, 15), textAlign: 'center' }}>{t.inviteFriends}</Text>
+          <View style={{ backgroundColor: '#fff', borderRadius: scale(18), padding: scale(28), alignItems: 'center', justifyContent: 'center', elevation: 4, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4 }}>
+            <Ionicons name="people" size={scale(44)} color="#00D4AA" style={{ marginBottom: verticalScale(10) }} />
+            <Text style={{ color: '#000', fontWeight: '600', fontSize: cappedFontSize(16, 17), marginBottom: verticalScale(4), letterSpacing: 0.5 }}>{t.noFriends}</Text>
+            <Text style={{ color: '#666', fontWeight: '400', fontSize: cappedFontSize(15, 15), textAlign: 'center' }}>{t.inviteFriends}</Text>
           </View>
         )}
       </View>
       <Modal visible={modalVisible} animationType="slide" transparent onRequestClose={() => setModalVisible(false)}>
         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center' }}>
-          <View style={{ width: modalWidth, height: modalHeight, borderRadius: scale(16), overflow: 'hidden', alignItems: 'center', justifyContent: 'flex-start', position: 'relative', backgroundColor: 'transparent' }}>
-            <AnimatedBackground />
-            <View style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', padding: scale(24) }}>
+          <View style={{ width: modalWidth, height: modalHeight, borderRadius: scale(16), overflow: 'hidden', alignItems: 'center', justifyContent: 'flex-start', position: 'relative', backgroundColor: '#fff' }}>
+            <View style={{ width: '100%', height: '100%', padding: scale(24) }}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: verticalScale(18) }}>
-                <Text style={{ color: isDarkMode ? '#fff' : '#000', fontWeight: '400', fontSize: cappedFontSize(22, 22), letterSpacing: 0.8 }}>{t.friends}</Text>
-                <TouchableOpacity onPress={() => setModalVisible(false)}><Ionicons name="close" size={scale(28)} color={isDarkMode ? "#fff" : "#000"} /></TouchableOpacity>
+                <Text style={{ color: '#000', fontWeight: '600', fontSize: cappedFontSize(22, 22), letterSpacing: 0.5 }}>{t.friends}</Text>
+                <TouchableOpacity onPress={() => setModalVisible(false)}><Ionicons name="close" size={scale(28)} color="#000" /></TouchableOpacity>
               </View>
               <ScrollView style={{ width: '100%' }}>
                 {[...online, ...offline].map((f, idx, arr) => renderFriendInModal(f, idx, arr))}

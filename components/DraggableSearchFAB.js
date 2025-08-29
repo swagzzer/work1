@@ -111,17 +111,7 @@ function DraggableSearchFAB({ setSearchVisible, onUserSelect }) {
       <RNAnimated.View
         pointerEvents="box-none"
         style={[
-          {
-            position: 'absolute',
-            backgroundColor: 'rgba(35, 43, 59, 0.7)',
-            borderRadius: 30,
-            width: 60,
-            height: 60,
-            alignItems: 'center',
-            justifyContent: 'center',
-
-            zIndex: 99999,
-          },
+          styles.fabContainer,
           pan.getLayout(),
         ]}
         {...panResponder.panHandlers}
@@ -132,10 +122,12 @@ function DraggableSearchFAB({ setSearchVisible, onUserSelect }) {
             console.log('FAB pressed');
             setSearchVisible(true);
           }}
-          style={{ width: 60, height: 60, alignItems: 'center', justifyContent: 'center' }}
-          activeOpacity={0.7}
+          style={styles.fabButton}
+          activeOpacity={0.8}
         >
-          <Ionicons name="search" size={28} color="#fff" />
+          <View style={styles.fabIconContainer}>
+            <Ionicons name="search" size={28} color="#fff" />
+          </View>
         </TouchableOpacity>
       </RNAnimated.View>
     </>
@@ -167,161 +159,349 @@ function SearchModal({ visible, onClose, allUsers, onUserSelect, currentUserId, 
   }, [searchInput, allUsers, currentUserId]);
 
   return (
-    <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.8)', justifyContent: 'flex-start', alignItems: 'stretch' }}>
-          <View style={{ borderRadius: 0, width: '100%', height: '100%', padding: 0, alignItems: 'stretch', justifyContent: 'flex-start', overflow: 'hidden', backgroundColor: isDarkMode ? '#2a3441' : '#fff' }}>
-            <View style={{ flex: 1, padding: 28, paddingTop: 60 }}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
-                <Text style={{ color: '#FFFF00', fontWeight: '400', fontSize: 22, letterSpacing: 0.8 }}>Pretrazi</Text>
-                <TouchableOpacity onPress={onClose}><Ionicons name="close" size={28} color={isDarkMode ? "#fff" : "#000"} /></TouchableOpacity>
+    <Modal visible={visible} animationType="slide" transparent={false} onRequestClose={onClose}>
+      <View style={styles.modalContainer}>
+        {/* Header */}
+        <View style={styles.modalHeader}>
+          <View style={styles.headerContent}>
+            <View style={styles.titleContainer}>
+              <View style={styles.titleIcon}>
+                <Ionicons name="search" size={24} color="#00D4AA" />
               </View>
-              <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: isDarkMode ? '#2a3441' : '#F5F5F5', borderRadius: 12, paddingHorizontal: 14, marginBottom: 24 }}>
-                <Ionicons name="search" size={22} color={isDarkMode ? "#b0b8c1" : "#666"} style={{ marginRight: 8 }} />
-                <TextInput
-                  style={{ flex: 1, color: isDarkMode ? '#fff' : '#000', fontSize: 18, paddingVertical: 14 }}
-                  placeholder="Pretrazi..."
-                  placeholderTextColor={isDarkMode ? "#b0b8c1" : "#666"}
-                  value={searchInput}
-                  onChangeText={setSearchInput}
-                />
-              </View>
-              <Text style={{ color: '#FFFF00', fontSize: 15, marginBottom: 16 }}>Unesite tekst za pretrazivanje prijatelja</Text>
-              <View style={{ flex: 1, maxHeight: '100%' }}>
-                {filteredUsers.length === 0 && searchInput ? (
-                  <Text style={{ color: isDarkMode ? '#b0b8c1' : '#666', fontSize: 17, textAlign: 'center', marginTop: 20 }}>Nema rezultata.</Text>
-                ) : (
-                  filteredUsers.map(user => {
-                    // Check if profile is private AND user is not a friend
-                    const isPrivate = user.privacy_settings?.profileVisibility === 'private' && 
-                      !currentUserFriends.some(friend => 
-                        (friend.from_user === currentUserId && friend.to_user === user.id) ||
-                        (friend.to_user === currentUserId && friend.from_user === user.id)
-                      );
-                    return (
-                      <TouchableOpacity 
-                        key={user.id} 
-                        style={{ 
-                          flexDirection: 'row', 
-                          alignItems: 'center', 
-                          paddingVertical: 12,
-                          opacity: isPrivate ? 0.6 : 1
-                        }} 
-                        onPress={() => !isPrivate && onUserSelect(user)}
-                        disabled={isPrivate}
-                      >
-                        <View style={{ width: 38, height: 38, borderRadius: 19, backgroundColor: isDarkMode ? '#2a3441' : '#F5F5F5', alignItems: 'center', justifyContent: 'center', marginRight: 14 }}>
-                          {user.avatar_url ? (
-                            <Image
-                              source={{ uri: user.avatar_url }}
-                              style={{
-                                width: 38,
-                                height: 38,
-                                borderRadius: 19,
-                                resizeMode: 'cover',
-                              }}
-                            />
-                          ) : (
-                            <Text style={{ color: isDarkMode ? '#fff' : '#000', fontWeight: '400', fontSize: 16, letterSpacing: 0.5 }}>{user.username?.[0]?.toUpperCase() || '?'}</Text>
-                          )}
-                        </View>
-                        <View style={{ flex: 1 }}>
-                          <Text style={{ color: isDarkMode ? '#fff' : '#000', fontWeight: '400', fontSize: 15, letterSpacing: 0.5 }}>{user.name} {user.surname}</Text>
-                          <Text style={{ color: '#FFFF00', fontSize: 15 }}>@{user.username}</Text>
-                        </View>
-                        {isPrivate && (
-                          <View style={{ 
-                            backgroundColor: 'rgba(255, 255, 255, 0.1)', 
-                            paddingHorizontal: 12, 
-                            paddingVertical: 6, 
-                            borderRadius: 12 
-                          }}>
-                            <Text style={{ color: '#FFFF00', fontSize: 12, fontWeight: '500' }}>
-                              {language === 'english' ? 'Private' : 'Privatno'}
-                            </Text>
-                          </View>
-                        )}
-                      </TouchableOpacity>
-                    );
-                  })
-                )}
-              </View>
+              <Text style={styles.modalTitle}>Pretraži</Text>
             </View>
+            <TouchableOpacity onPress={onClose} style={styles.modalCloseButton}>
+              <Ionicons name="close" size={28} color="#00D4AA" />
+            </TouchableOpacity>
           </View>
         </View>
-      </TouchableWithoutFeedback>
+
+        {/* Search Input */}
+        <View style={styles.searchContainer}>
+          <View style={styles.searchInputContainer}>
+            <Ionicons name="search" size={22} color="#666" style={styles.searchIcon} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Pretraži prijatelje..."
+              placeholderTextColor="#999"
+              value={searchInput}
+              onChangeText={setSearchInput}
+            />
+          </View>
+        </View>
+
+        {/* Instructions */}
+        <View style={styles.instructionsContainer}>
+          <Text style={styles.instructionsText}>
+            Unesite tekst za pretraživanje prijatelja
+          </Text>
+        </View>
+
+        {/* Results */}
+        <View style={styles.resultsContainer}>
+          {filteredUsers.length === 0 && searchInput ? (
+            <View style={styles.emptyContainer}>
+              <View style={styles.emptyIcon}>
+                <Ionicons name="search-outline" size={64} color="#00D4AA" />
+              </View>
+              <Text style={styles.emptyTitle}>Nema rezultata</Text>
+              <Text style={styles.emptySubtitle}>Pokušajte sa drugim ključnim rečima</Text>
+            </View>
+          ) : (
+            filteredUsers.map(user => {
+              // Check if profile is private AND user is not a friend
+              const isPrivate = user.privacy_settings?.profileVisibility === 'private' && 
+                !currentUserFriends.some(friend => 
+                  (friend.from_user === currentUserId && friend.to_user === user.id) ||
+                  (friend.to_user === currentUserId && friend.from_user === user.id)
+                );
+              return (
+                <TouchableOpacity 
+                  key={user.id} 
+                  style={[styles.userCard, isPrivate && styles.privateUserCard]} 
+                  onPress={() => !isPrivate && onUserSelect(user)}
+                  disabled={isPrivate}
+                >
+                  <View style={styles.userAvatar}>
+                    {user.avatar_url ? (
+                      <Image
+                        source={{ uri: user.avatar_url }}
+                        style={styles.avatarImage}
+                      />
+                    ) : (
+                      <Text style={styles.avatarText}>
+                        {user.username?.[0]?.toUpperCase() || '?'}
+                      </Text>
+                    )}
+                  </View>
+                  <View style={styles.userInfo}>
+                    <Text style={styles.userName}>{user.name} {user.surname}</Text>
+                    <Text style={styles.userUsername}>@{user.username}</Text>
+                  </View>
+                  {isPrivate && (
+                    <View style={styles.privateBadge}>
+                      <Text style={styles.privateText}>
+                        {language === 'english' ? 'Private' : 'Privatno'}
+                      </Text>
+                    </View>
+                  )}
+                  {!isPrivate && (
+                    <View style={styles.selectButton}>
+                      <Ionicons name="chevron-forward" size={20} color="#00D4AA" />
+                    </View>
+                  )}
+                </TouchableOpacity>
+              );
+            })
+          )}
+        </View>
+      </View>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.8)',
-    justifyContent: 'flex-start',
-    alignItems: 'center',
+  // FAB Styles
+  fabContainer: {
+    position: 'absolute',
+    zIndex: 99999,
   },
-  modalView: {
-    borderRadius: 20,
-    padding: 20,
-    width: '95%',
-    marginTop: 60,
-    height: '85%',
+  fabButton: {
+    width: 60,
+    height: 60,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  fabIconContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#00D4AA',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+
+  // Modal Styles
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#fff',
   },
   modalHeader: {
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E5E5',
+    paddingTop: 60,
+    paddingBottom: 20,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  headerContent: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+    justifyContent: 'space-between',
+    paddingHorizontal: 24,
+  },
+  titleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  titleIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#F0FDF4',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
+    borderWidth: 2,
+    borderColor: '#00D4AA',
   },
   modalTitle: {
-    color: '#E2E8F0',
-    fontWeight: 'bold',
-    fontSize: 22,
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#000',
+    letterSpacing: 0.8,
+  },
+  modalCloseButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#F3F4F6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+
+  // Search Input Styles
+  searchContainer: {
+    paddingHorizontal: 24,
+    paddingTop: 24,
+    paddingBottom: 16,
   },
   searchInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.2)',
-    borderRadius: 12,
-    paddingHorizontal: 8,
-    marginBottom: 20,
+    backgroundColor: '#F3F4F6',
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 4,
+    borderWidth: 1,
+    borderColor: '#E5E5E5',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  searchIcon: {
+    marginRight: 12,
   },
   searchInput: {
     flex: 1,
-    color: '#E2E8F0',
+    color: '#000',
     fontSize: 16,
-    padding: 12,
+    paddingVertical: 16,
+    fontWeight: '500',
   },
-  resultItem: {
+
+  // Instructions Styles
+  instructionsContainer: {
+    paddingHorizontal: 24,
+    paddingBottom: 20,
+  },
+  instructionsText: {
+    color: '#666',
+    fontSize: 14,
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+
+  // Results Styles
+  resultsContainer: {
+    flex: 1,
+    paddingHorizontal: 24,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 40,
+  },
+  emptyIcon: {
+    marginBottom: 24,
+    opacity: 0.7,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#000',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  emptySubtitle: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+
+  // User Card Styles
+  userCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    borderWidth: 1,
+    borderColor: '#E5E5E5',
   },
-  avatar: {
+  privateUserCard: {
+    opacity: 0.6,
+  },
+  userAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#00D4AA',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  avatarImage: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    resizeMode: 'cover',
+  },
+  avatarText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 18,
+    letterSpacing: 0.5,
+  },
+  userInfo: {
+    flex: 1,
+  },
+  userName: {
+    color: '#000',
+    fontWeight: '600',
+    fontSize: 16,
+    marginBottom: 4,
+    letterSpacing: 0.5,
+  },
+  userUsername: {
+    color: '#666',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  privateBadge: {
+    backgroundColor: '#FEF2F2',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#EF4444',
+  },
+  privateText: {
+    color: '#EF4444',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  selectButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#4A5568',
-    justifyContent: 'center',
+    backgroundColor: '#F3F4F6',
     alignItems: 'center',
-    marginRight: 12,
-  },
-  avatarText: {
-    color: '#E2E8F0',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  resultName: {
-    color: '#E2E8F0',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  resultUsername: {
-    color: '#A0AEC0',
-    fontSize: 14,
+    justifyContent: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
 });
 
