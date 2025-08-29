@@ -1,8 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import { scale, verticalScale } from '../constants/Responsive';
-import AnimatedBackground from './AnimatedBackground';
+import { scale } from '../constants/Responsive';
 
 const PlaceholderModal = ({ visible, onClose, title, data, onItemPress, language = 'serbian', isDarkMode = true }) => {
   const [loading, setLoading] = useState(true);
